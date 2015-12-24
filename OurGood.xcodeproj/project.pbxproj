@@ -75,6 +75,7 @@
 		07AEB6591C2BA0C400E5F41A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		41CF33BB84700328BDD24CC5 /* libPods-OurGood.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OurGood.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BD879133B624D6C7163A963 /* Pods-OurGood.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OurGood.release.xcconfig"; path = "Pods/Target Support Files/Pods-OurGood/Pods-OurGood.release.xcconfig"; sourceTree = "<group>"; };
+		878BC3211C2BAB77006D1974 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		BB678B35EDE9694D6131789A /* Pods-OurGood.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OurGood.debug.xcconfig"; path = "Pods/Target Support Files/Pods-OurGood/Pods-OurGood.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -194,6 +195,7 @@
 		B2F027AE62F7FDD40E9C70FB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				878BC3211C2BAB77006D1974 /* MapKit.framework */,
 				41CF33BB84700328BDD24CC5 /* libPods-OurGood.a */,
 			);
 			name = Frameworks;
