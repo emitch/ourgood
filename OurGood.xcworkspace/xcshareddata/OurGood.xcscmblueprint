@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "7E91FCB23C1BBAFAC8584D3635CBC407E3E43EBB",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "13D27C4A688920CCE434C0305B61BB0D8D35B342" : 0,
+    "7E91FCB23C1BBAFAC8584D3635CBC407E3E43EBB" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "24AD4518-4614-48AD-90E1-9E2FF3913243",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "13D27C4A688920CCE434C0305B61BB0D8D35B342" : "",
+    "7E91FCB23C1BBAFAC8584D3635CBC407E3E43EBB" : "ourgood\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "OurGood",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "OurGood.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/crmounts\/commpound.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "13D27C4A688920CCE434C0305B61BB0D8D35B342"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/emitch\/ourgood.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "7E91FCB23C1BBAFAC8584D3635CBC407E3E43EBB"
+    }
+  ]
+}

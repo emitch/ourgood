@@ -23,6 +23,10 @@
 		07AEB64D1C2BA0C400E5F41A /* OurGoodTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AEB64C1C2BA0C400E5F41A /* OurGoodTests.m */; };
 		07AEB6581C2BA0C400E5F41A /* OurGoodUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AEB6571C2BA0C400E5F41A /* OurGoodUITests.m */; };
 		3B1D50738CCD4A9B39D24584 /* libPods-OurGood.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41CF33BB84700328BDD24CC5 /* libPods-OurGood.a */; };
+		878BC32A1C2BC22D006D1974 /* .parse.local in Resources */ = {isa = PBXBuildFile; fileRef = 878BC3241C2BC22D006D1974 /* .parse.local */; };
+		878BC32B1C2BC22D006D1974 /* .parse.project in Resources */ = {isa = PBXBuildFile; fileRef = 878BC3251C2BC22D006D1974 /* .parse.project */; };
+		878BC32C1C2BC22D006D1974 /* main.js in Resources */ = {isa = PBXBuildFile; fileRef = 878BC3271C2BC22D006D1974 /* main.js */; };
+		878BC32D1C2BC22D006D1974 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = 878BC3291C2BC22D006D1974 /* index.html */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +80,10 @@
 		41CF33BB84700328BDD24CC5 /* libPods-OurGood.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OurGood.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BD879133B624D6C7163A963 /* Pods-OurGood.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OurGood.release.xcconfig"; path = "Pods/Target Support Files/Pods-OurGood/Pods-OurGood.release.xcconfig"; sourceTree = "<group>"; };
 		878BC3211C2BAB77006D1974 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		878BC3241C2BC22D006D1974 /* .parse.local */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .parse.local; sourceTree = "<group>"; };
+		878BC3251C2BC22D006D1974 /* .parse.project */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .parse.project; sourceTree = "<group>"; };
+		878BC3271C2BC22D006D1974 /* main.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = main.js; sourceTree = "<group>"; };
+		878BC3291C2BC22D006D1974 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		BB678B35EDE9694D6131789A /* Pods-OurGood.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OurGood.debug.xcconfig"; path = "Pods/Target Support Files/Pods-OurGood/Pods-OurGood.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -160,6 +168,7 @@
 		07AEB62F1C2BA0C400E5F41A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				878BC3231C2BC22D006D1974 /* cloud */,
 				07AEB6301C2BA0C400E5F41A /* main.m */,
 			);
 			name = "Supporting Files";
@@ -190,6 +199,33 @@
 				4BD879133B624D6C7163A963 /* Pods-OurGood.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		878BC3231C2BC22D006D1974 /* cloud */ = {
+			isa = PBXGroup;
+			children = (
+				878BC3241C2BC22D006D1974 /* .parse.local */,
+				878BC3251C2BC22D006D1974 /* .parse.project */,
+				878BC3261C2BC22D006D1974 /* cloud */,
+				878BC3281C2BC22D006D1974 /* public */,
+			);
+			path = cloud;
+			sourceTree = "<group>";
+		};
+		878BC3261C2BC22D006D1974 /* cloud */ = {
+			isa = PBXGroup;
+			children = (
+				878BC3271C2BC22D006D1974 /* main.js */,
+			);
+			path = cloud;
+			sourceTree = "<group>";
+		};
+		878BC3281C2BC22D006D1974 /* public */ = {
+			isa = PBXGroup;
+			children = (
+				878BC3291C2BC22D006D1974 /* index.html */,
+			);
+			path = public;
 			sourceTree = "<group>";
 		};
 		B2F027AE62F7FDD40E9C70FB /* Frameworks */ = {
@@ -271,6 +307,11 @@
 				TargetAttributes = {
 					07AEB62B1C2BA0C400E5F41A = {
 						CreatedOnToolsVersion = 7.2;
+						SystemCapabilities = {
+							com.apple.Maps.iOS = {
+								enabled = 0;
+							};
+						};
 					};
 					07AEB6471C2BA0C400E5F41A = {
 						CreatedOnToolsVersion = 7.2;
@@ -307,9 +348,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				878BC32D1C2BC22D006D1974 /* index.html in Resources */,
 				07070A801C2BA521008D5151 /* Main.storyboard in Resources */,
 				07070A741C2BA50B008D5151 /* Assets.xcassets in Resources */,
+				878BC32A1C2BC22D006D1974 /* .parse.local in Resources */,
+				878BC32C1C2BC22D006D1974 /* main.js in Resources */,
 				07070A7F1C2BA521008D5151 /* LaunchScreen.storyboard in Resources */,
+				878BC32B1C2BC22D006D1974 /* .parse.project in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
