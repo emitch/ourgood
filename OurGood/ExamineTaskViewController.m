@@ -8,11 +8,43 @@
 
 #import "ExamineTaskViewController.h"
 
+#define COLLECTION_VIEW_SPACING 8.f
+
 @interface ExamineTaskViewController ()
 
 @end
 
 @implementation ExamineTaskViewController
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    return CGSizeMake(50.f, 50.f);
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
+    return COLLECTION_VIEW_SPACING;
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
+    return COLLECTION_VIEW_SPACING;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return 30;
+}
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    return 1;
+}
+
+- (UICollectionViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString* const Identifier = @"UserView";
+    
+    UICollectionViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:Identifier forIndexPath:indexPath];
+    
+    cell.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255) / (CGFloat)255 green:arc4random_uniform(255) / (CGFloat)255 blue:arc4random_uniform(255) / (CGFloat)255 alpha:1.f];
+    
+    return cell;
+}
 
 - (BOOL)hasBitcoinAddress {
     return [[PFUser currentUser][@"address"] length];
@@ -29,11 +61,18 @@
     for (PFObject* payment in task[@"committedPayments"]) {
         [payment fetchIfNeeded];
         _totalValue += [payment[@"amount"] integerValue];
+        
         if ([payment[@"username"] isEqualToString:[PFUser currentUser].username]) {
+            assert(!_hasContributed); // Should only have contributed once
+            
             _hasContributed = YES;
             _myContribution = [payment[@"amount"] intValue];
         }
     }
+}
+
+- (IBAction)imageButtonPressed:(id)sender {
+    // TODO - Go fullscreen
 }
 
 - (IBAction)claimPressed:(id)sender {
@@ -65,6 +104,7 @@
             }];
         }];
     }]];
+    
     [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }]];
@@ -145,18 +185,31 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Claim!" style:UIBarButtonItemStylePlain target:self action:@selector(claimPressed:)];
+    self.navigationItem.rightBarButtonItem.tintColor = [UIColor colorWithRed:0 green:153.f/255.f blue:0 alpha:1.f];
+    
+    _descriptionTextView.textContainerInset = UIEdgeInsetsZero;
+    
+    _collectionView.backgroundColor = self.view.backgroundColor;
+    
     if ([[PFUser currentUser].username isEqualToString:_task[@"poster"]]) {
-        _titleLabel.text = @"Posted by you!";
+        _titleLabel.text = @"You posted this task";
     } else {
         _titleLabel.text = [NSString stringWithFormat:@"Posted by: %@", _task[@"poster"]];
     }
+    
+    _contributionsLabel.text = [NSString stringWithFormat:@"%lu", [_contributions count]];
+    
     if ([_contributions count] == 1) {
-        _contributionsLabel.text = @"1 Contribution";
-    } else {
-        _contributionsLabel.text = [NSString stringWithFormat:@"%lu Contributions", [_contributions count]];
+        _contributionTitleLabel.text = @"Contribution";
     }
-    _valueLabel.text = [NSString stringWithFormat:@"Worth $%lu.00", _totalValue];
-    _descriptionTextView.text = _task[@"description"];
+    
+    _contributionsLabel.adjustsFontSizeToFitWidth = YES;
+    _valueLabel.text = [NSString stringWithFormat:@"$%lu", _totalValue];
+    _valueLabel.adjustsFontSizeToFitWidth = YES;
+    
+    // _descriptionTextView.text = _task[@"description"];
+    _descriptionTextView.text = @"Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.";
     
     __weak id weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -185,8 +238,7 @@
     }
     
     if (_hasContributed) {
-        _contributeButton.enabled = NO;
-        [_contributeButton setTitle:[NSString stringWithFormat:@"You contributed $%ld", (long)_myContribution] forState:UIControlStateNormal];
+        [_contributeButton setTitle:[NSString stringWithFormat:@"You've contributed $%ld", (long)_myContribution] forState:UIControlStateNormal];
     }
     
     if ([_task[@"poster"] isEqualToString:[PFUser currentUser].username]) {

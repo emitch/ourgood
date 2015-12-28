@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <Parse/Parse.h>
 
-@interface ExamineTaskViewController : UIViewController {
+@interface ExamineTaskViewController : UIViewController <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout> {
     NSArray* _contributions;
     
     __weak UIAlertAction* _contributeAction;
@@ -25,8 +25,15 @@
 
 @property (nonatomic, weak) IBOutlet UIButton* claimButton;
 @property (nonatomic, weak) IBOutlet UIButton* contributeButton;
+@property (nonatomic, weak) IBOutlet UIButton* imageButton;
+
 @property (nonatomic, weak) IBOutlet UITextView* descriptionTextView;
+
 @property (nonatomic, weak) IBOutlet UIImageView* imageView;
+
+@property (nonatomic, weak) IBOutlet UICollectionView* collectionView;
+
+@property (nonatomic, weak) IBOutlet UILabel* contributionTitleLabel;
 @property (nonatomic, weak) IBOutlet UILabel* titleLabel;
 @property (nonatomic, weak) IBOutlet UILabel* contributionsLabel;
 @property (nonatomic, weak) IBOutlet UILabel* valueLabel;
