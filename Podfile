@@ -6,6 +6,7 @@
 target 'OurGood' do
 pod 'Parse'
 pod 'ParseUI'
+pod 'PKRevealController'
 end
 
 target 'OurGoodTests' do
