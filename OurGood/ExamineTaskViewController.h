@@ -23,9 +23,11 @@
 - (IBAction)claimPressed:(id)sender;
 - (IBAction)contributePressed:(id)sender;
 
-@property (nonatomic, weak) IBOutlet UIButton* claimButton;
-@property (nonatomic, weak) IBOutlet UIButton* contributeButton;
+@property (nonatomic, weak) IBOutlet UIButton* helpButton;
 @property (nonatomic, weak) IBOutlet UIButton* imageButton;
+
+@property (nonatomic, weak) IBOutlet UIView* collectionContainer;
+@property (nonatomic, weak) IBOutlet UIView* labelContainer;
 
 @property (nonatomic, weak) IBOutlet UITextView* descriptionTextView;
 
@@ -33,8 +35,12 @@
 
 @property (nonatomic, weak) IBOutlet UICollectionView* collectionView;
 
+
+@property (nonatomic, weak) IBOutlet UILabel* claimPeriodLabel;
+@property (nonatomic, weak) IBOutlet UILabel* yourContributionLabel;
 @property (nonatomic, weak) IBOutlet UILabel* contributionTitleLabel;
 @property (nonatomic, weak) IBOutlet UILabel* titleLabel;
+@property (nonatomic, weak) IBOutlet UILabel* posterLabel;
 @property (nonatomic, weak) IBOutlet UILabel* contributionsLabel;
 @property (nonatomic, weak) IBOutlet UILabel* valueLabel;
 

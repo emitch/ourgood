@@ -19,6 +19,7 @@
 		07070A7C1C2BA50B008D5151 /* SignUpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07070A721C2BA50B008D5151 /* SignUpViewController.m */; };
 		07070A7F1C2BA521008D5151 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07070A7D1C2BA521008D5151 /* LaunchScreen.storyboard */; };
 		07070A801C2BA521008D5151 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07070A7E1C2BA521008D5151 /* Main.storyboard */; };
+		0729C4B01C34605C0040B09B /* LineButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 0729C4AF1C34605C0040B09B /* LineButton.m */; };
 		07AEB6311C2BA0C400E5F41A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AEB6301C2BA0C400E5F41A /* main.m */; };
 		07AEB64D1C2BA0C400E5F41A /* OurGoodTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AEB64C1C2BA0C400E5F41A /* OurGoodTests.m */; };
 		07AEB6581C2BA0C400E5F41A /* OurGoodUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AEB6571C2BA0C400E5F41A /* OurGoodUITests.m */; };
@@ -68,6 +69,8 @@
 		07070A721C2BA50B008D5151 /* SignUpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SignUpViewController.m; sourceTree = "<group>"; };
 		07070A7D1C2BA521008D5151 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		07070A7E1C2BA521008D5151 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		0729C4AE1C34605C0040B09B /* LineButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LineButton.h; sourceTree = "<group>"; };
+		0729C4AF1C34605C0040B09B /* LineButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LineButton.m; sourceTree = "<group>"; };
 		07AEB62C1C2BA0C400E5F41A /* OurGood.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OurGood.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		07AEB6301C2BA0C400E5F41A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		07AEB6431C2BA0C400E5F41A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -140,6 +143,8 @@
 			children = (
 				07070A5F1C2BA50B008D5151 /* AppDelegate.h */,
 				07070A601C2BA50B008D5151 /* AppDelegate.m */,
+				0729C4AE1C34605C0040B09B /* LineButton.h */,
+				0729C4AF1C34605C0040B09B /* LineButton.m */,
 				07070A631C2BA50B008D5151 /* ExamineTaskViewController.h */,
 				07070A641C2BA50B008D5151 /* ExamineTaskViewController.m */,
 				07070A651C2BA50B008D5151 /* HomeViewController.h */,
@@ -156,9 +161,9 @@
 				07070A701C2BA50B008D5151 /* NewTaskViewController.m */,
 				07070A711C2BA50B008D5151 /* SignUpViewController.h */,
 				07070A721C2BA50B008D5151 /* SignUpViewController.m */,
-				07070A611C2BA50B008D5151 /* Assets.xcassets */,
 				07070A7D1C2BA521008D5151 /* LaunchScreen.storyboard */,
 				07070A7E1C2BA521008D5151 /* Main.storyboard */,
+				07070A611C2BA50B008D5151 /* Assets.xcassets */,
 				07AEB6431C2BA0C400E5F41A /* Info.plist */,
 				07AEB62F1C2BA0C400E5F41A /* Supporting Files */,
 			);
@@ -435,6 +440,7 @@
 				07070A791C2BA50B008D5151 /* LoginViewController.m in Sources */,
 				07070A7C1C2BA50B008D5151 /* SignUpViewController.m in Sources */,
 				07070A751C2BA50B008D5151 /* ExamineTaskViewController.m in Sources */,
+				0729C4B01C34605C0040B09B /* LineButton.m in Sources */,
 				07070A761C2BA50B008D5151 /* HomeViewController.m in Sources */,
 				07070A7A1C2BA50B008D5151 /* MyStuffViewController.m in Sources */,
 			);

@@ -43,9 +43,9 @@
     _point = [LocationSingleton sharedSingleton].geoPoint;
     
     UIView* contributionsPadding = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, _titleField.frame.size.height)];
-    contributionsPadding.backgroundColor = [UIColor colorWithWhite:.9f alpha:1.f];
+    contributionsPadding.backgroundColor = [UIColor colorWithWhite:.95f alpha:1.f];
     UIView* claimPadding = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, _titleField.frame.size.height)];
-    claimPadding.backgroundColor = [UIColor colorWithWhite:.9f alpha:1.f];
+    claimPadding.backgroundColor = [UIColor colorWithWhite:.95f alpha:1.f];
     
     _contributionField.leftView = contributionsPadding;
     _claimPeriodField.leftView = claimPadding;

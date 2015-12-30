@@ -156,11 +156,15 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     ExamineTaskViewController* VC = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"ExamineTaskViewController"];
-    VC.task = _tasks[indexPath.row];
-    
-    self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:self.navigationItem.backBarButtonItem.style target:nil action:nil];
-
-    [self.navigationController pushViewController:VC animated:YES];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        VC.task = _tasks[indexPath.row];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:self.navigationItem.backBarButtonItem.style target:nil action:nil];
+            
+            [self.navigationController pushViewController:VC animated:YES];
+        });
+    });
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
