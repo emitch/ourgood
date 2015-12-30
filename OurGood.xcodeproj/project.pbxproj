@@ -13,10 +13,8 @@
 		07070A761C2BA50B008D5151 /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07070A661C2BA50B008D5151 /* HomeViewController.m */; };
 		07070A771C2BA50B008D5151 /* LocationAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 07070A681C2BA50B008D5151 /* LocationAnnotation.m */; };
 		07070A781C2BA50B008D5151 /* LocationSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 07070A6A1C2BA50B008D5151 /* LocationSingleton.m */; };
-		07070A791C2BA50B008D5151 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07070A6C1C2BA50B008D5151 /* LoginViewController.m */; };
 		07070A7A1C2BA50B008D5151 /* MyStuffViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07070A6E1C2BA50B008D5151 /* MyStuffViewController.m */; };
 		07070A7B1C2BA50B008D5151 /* NewTaskViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07070A701C2BA50B008D5151 /* NewTaskViewController.m */; };
-		07070A7C1C2BA50B008D5151 /* SignUpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07070A721C2BA50B008D5151 /* SignUpViewController.m */; };
 		07070A7F1C2BA521008D5151 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07070A7D1C2BA521008D5151 /* LaunchScreen.storyboard */; };
 		07070A801C2BA521008D5151 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07070A7E1C2BA521008D5151 /* Main.storyboard */; };
 		0729C4B01C34605C0040B09B /* LineButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 0729C4AF1C34605C0040B09B /* LineButton.m */; };
@@ -59,14 +57,10 @@
 		07070A681C2BA50B008D5151 /* LocationAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationAnnotation.m; sourceTree = "<group>"; };
 		07070A691C2BA50B008D5151 /* LocationSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationSingleton.h; sourceTree = "<group>"; };
 		07070A6A1C2BA50B008D5151 /* LocationSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationSingleton.m; sourceTree = "<group>"; };
-		07070A6B1C2BA50B008D5151 /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
-		07070A6C1C2BA50B008D5151 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		07070A6D1C2BA50B008D5151 /* MyStuffViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyStuffViewController.h; sourceTree = "<group>"; };
 		07070A6E1C2BA50B008D5151 /* MyStuffViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyStuffViewController.m; sourceTree = "<group>"; };
 		07070A6F1C2BA50B008D5151 /* NewTaskViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewTaskViewController.h; sourceTree = "<group>"; };
 		07070A701C2BA50B008D5151 /* NewTaskViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewTaskViewController.m; sourceTree = "<group>"; };
-		07070A711C2BA50B008D5151 /* SignUpViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SignUpViewController.h; sourceTree = "<group>"; };
-		07070A721C2BA50B008D5151 /* SignUpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SignUpViewController.m; sourceTree = "<group>"; };
 		07070A7D1C2BA521008D5151 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		07070A7E1C2BA521008D5151 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		0729C4AE1C34605C0040B09B /* LineButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LineButton.h; sourceTree = "<group>"; };
@@ -153,14 +147,10 @@
 				07070A681C2BA50B008D5151 /* LocationAnnotation.m */,
 				07070A691C2BA50B008D5151 /* LocationSingleton.h */,
 				07070A6A1C2BA50B008D5151 /* LocationSingleton.m */,
-				07070A6B1C2BA50B008D5151 /* LoginViewController.h */,
-				07070A6C1C2BA50B008D5151 /* LoginViewController.m */,
 				07070A6D1C2BA50B008D5151 /* MyStuffViewController.h */,
 				07070A6E1C2BA50B008D5151 /* MyStuffViewController.m */,
 				07070A6F1C2BA50B008D5151 /* NewTaskViewController.h */,
 				07070A701C2BA50B008D5151 /* NewTaskViewController.m */,
-				07070A711C2BA50B008D5151 /* SignUpViewController.h */,
-				07070A721C2BA50B008D5151 /* SignUpViewController.m */,
 				07070A7D1C2BA521008D5151 /* LaunchScreen.storyboard */,
 				07070A7E1C2BA521008D5151 /* Main.storyboard */,
 				07070A611C2BA50B008D5151 /* Assets.xcassets */,
@@ -437,8 +427,6 @@
 				07070A7B1C2BA50B008D5151 /* NewTaskViewController.m in Sources */,
 				07070A781C2BA50B008D5151 /* LocationSingleton.m in Sources */,
 				07AEB6311C2BA0C400E5F41A /* main.m in Sources */,
-				07070A791C2BA50B008D5151 /* LoginViewController.m in Sources */,
-				07070A7C1C2BA50B008D5151 /* SignUpViewController.m in Sources */,
 				07070A751C2BA50B008D5151 /* ExamineTaskViewController.m in Sources */,
 				0729C4B01C34605C0040B09B /* LineButton.m in Sources */,
 				07070A761C2BA50B008D5151 /* HomeViewController.m in Sources */,

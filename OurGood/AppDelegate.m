@@ -21,8 +21,6 @@
     [Parse setApplicationId:@"0hz4j6BrGaetCfwsK4aQ0uzVJVgyXtQUf5y04VwB"
                   clientKey:@"Yv4VT5PAqv0yMO2kYUP8JZe77PfskF6lmIkgA92e"];
     
-    //[[UINavigationBar appearance] setTitleTextAttributes:@{NSFontAttributeName: [UIFont fontWithName:@"HelveticaNeue-Thin" size:22.f], NSForegroundColorAttributeName: [UIColor blackColor]}];
-    
     [LocationSingleton sharedSingleton];
     
     return YES;

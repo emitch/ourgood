@@ -92,14 +92,23 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     
     self.automaticallyAdjustsScrollViewInsets = NO;
     
-    if ([PFUser currentUser]) {
-        [PFUser logOut];
-    }
-    
     UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
     [refreshControl addTarget:self action:@selector(refreshControlUsed:) forControlEvents:UIControlEventValueChanged];
     [_tableView addSubview:refreshControl];
     _refreshControl = refreshControl;
+    
+    if (![PFUser currentUser]) {
+        PFLogInViewController* logIn = [[PFLogInViewController alloc] init];
+        logIn.delegate = self;
+        
+        PFSignUpViewController* signUp = [[PFSignUpViewController alloc] init];
+        signUp.delegate = self;
+        logIn.signUpController = signUp;
+        
+        [self presentViewController:logIn animated:NO completion:nil];
+    } else {
+        [self refresh:![[PFUser currentUser].username isEqualToString:_lastUsername]];
+    }
 }
 
 - (void)newTaskPressed:(id)sender {
@@ -212,23 +221,6 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     [super viewWillDisappear:animated];
     
     _lastUsername = [[PFUser currentUser].username copy];
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    
-    if (![PFUser currentUser]) {
-        PFLogInViewController* logIn = [[PFLogInViewController alloc] init];
-        logIn.delegate = self;
-        
-        PFSignUpViewController* signUp = [[PFSignUpViewController alloc] init];
-        signUp.delegate = self;
-        logIn.signUpController = signUp;
-        
-        [self presentViewController:logIn animated:NO completion:nil];
-    } else {
-        [self refresh:![[PFUser currentUser].username isEqualToString:_lastUsername]];
-    }
 }
 
 - (void)signUpViewController:(PFSignUpViewController *)signUpController didSignUpUser:(PFUser *)user {
