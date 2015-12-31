@@ -14,13 +14,13 @@
 
 @implementation MyStuffViewController
 
-#define DAYS_TO_SECONDS (24 * 60 * 60)
-#define BLOCKCHAIN_API_KEY @"74c72cf4-9042-4d46-8506-3ceac4f862f9"
-#define SATOSHI_TO_BC (1/(float)100000000)
+#define DAYS_TO_SECONDS         (24 * 60 * 60)
+#define BLOCKCHAIN_API_KEY      @"74c72cf4-9042-4d46-8506-3ceac4f862f9"
+#define SATOSHI_TO_BC           (1 / (float)100000000)
 
-#define APP_MONEY_BOX_ADDRESS @"1Ko9TMHvR8X9a7s8PxnpedYHDuvY8VRgC1"
-#define APP_MONEY_BOX_GUID @"78adc4eb-8f0b-4b7b-8b75-0bd5bba6375b"
-#define APP_MONEY_BOX_PASSWORD @"APP_MONEY_BOX"
+#define APP_MONEY_BOX_ADDRESS   @"1Ko9TMHvR8X9a7s8PxnpedYHDuvY8VRgC1"
+#define APP_MONEY_BOX_GUID      @"78adc4eb-8f0b-4b7b-8b75-0bd5bba6375b"
+#define APP_MONEY_BOX_PASSWORD  @"APP_MONEY_BOX"
 
 #define FEE_SATOSHI 10000
 

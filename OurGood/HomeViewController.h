@@ -11,13 +11,15 @@
 #import <ParseUI/ParseUI.h>
 #import <MapKit/MapKit.h>
 
-@interface HomeViewController : UIViewController <PFLogInViewControllerDelegate, PFSignUpViewControllerDelegate, UITableViewDataSource, UITableViewDelegate, MKMapViewDelegate> {
+@interface HomeViewController : UIViewController <PFLogInViewControllerDelegate, PFSignUpViewControllerDelegate, UITableViewDataSource, UITableViewDelegate, MKMapViewDelegate, UICollectionViewDataSource, UICollectionViewDelegate> {
     __weak UIRefreshControl* _refreshControl;
     
     NSArray<PFObject*>* _tasks;
     
     NSString* _lastUsername;
 }
+
+@property (nonatomic, weak) IBOutlet UICollectionView* collectionView;
 
 @property (nonatomic, weak) IBOutlet UIActivityIndicatorView* indicator;
 @property (nonatomic, weak) IBOutlet UITableView* tableView;

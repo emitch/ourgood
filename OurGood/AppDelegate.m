@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import <Parse/Parse.h>
 #import "LocationSingleton.h"
+#import "MenuTableViewController.h"
 
 @interface AppDelegate ()
 
@@ -24,6 +25,10 @@
     [LocationSingleton sharedSingleton];
     
     return YES;
+}
+
++ (AppDelegate*)appDelegate {
+    return (AppDelegate*)[[UIApplication sharedApplication] delegate];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {

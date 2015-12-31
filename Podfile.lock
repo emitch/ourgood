@@ -5,17 +5,14 @@ PODS:
   - ParseUI (1.1.7):
     - Bolts/Tasks (~> 1.3)
     - Parse (~> 1.9)
-  - PKRevealController (2.0.6)
 
 DEPENDENCIES:
   - Parse
   - ParseUI
-  - PKRevealController
 
 SPEC CHECKSUMS:
   Bolts: a12663244b1d3351c738882e71902fc74db54f64
   Parse: 886af46a0a677402f6374bb97ac212e795f70afe
   ParseUI: c2bcdfbb00330e464b5b773266ae221697a3bb7b
-  PKRevealController: ffb45a16f5a5032ad90a3d16e5cbb0d8e035bd58
 
 COCOAPODS: 0.39.0

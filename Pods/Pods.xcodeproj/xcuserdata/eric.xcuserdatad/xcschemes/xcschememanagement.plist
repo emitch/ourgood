@@ -9,11 +9,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>PKRevealController.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>Parse.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -37,22 +32,17 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>947B3A6AF96CFDF28D73010DA64E37A5</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
 		<key>B53DF583949C0313F8655A28EF6EB07D</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>CD2B367A6ADAD06EE4F327DD0F8F1B6E</key>
+		<key>B8419284E463FC49B3736937A6AA9561</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>E86B23E2D7A4FC646398C771B94607AD</key>
+		<key>CD2B367A6ADAD06EE4F327DD0F8F1B6E</key>
 		<dict>
 			<key>primary</key>
 			<true/>

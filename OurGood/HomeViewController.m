@@ -12,17 +12,109 @@
 #import "LocationAnnotation.h"
 #import "NewTaskViewController.h"
 #import "ExamineTaskViewController.h"
+#import "AppDelegate.h"
+#import "PagingCollectionViewLayout.h"
 
 @interface HomeViewController ()
+
+@property (nonatomic) NSInteger selectedCommunity;
 
 @end
 
 @implementation HomeViewController
 
-#define BLOCKCHAIN_API_KEY @"3f0ec865-2d01-426d-8d6b-44aa86b02f62"
+#define BLOCKCHAIN_API_KEY      @"3f0ec865-2d01-426d-8d6b-44aa86b02f62"
+
+#define COLLECTION_VIEW_SPACING 8.f
+
+#define CELL_TITLE_LABEL_TAG    1
+#define CELL_DETAIL_VIEW_TAG    2
+#define CELL_BUTTON_TAG         3
 
 static NSString* const GetLocalTasksFunction = @"getLocalTasks";
 static NSString* const LocalTasksParameterName = @"postLocation";
+
+- (UICollectionViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString* const Identifier = @"CommunityCell";
+    
+    UICollectionViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:Identifier forIndexPath:indexPath];
+    
+    UILabel* titleLabel = [cell viewWithTag:CELL_TITLE_LABEL_TAG];
+    UITextView* detailView = [cell viewWithTag:CELL_DETAIL_VIEW_TAG];
+    
+    assert([titleLabel isKindOfClass:[UILabel class]]);
+    assert([detailView isKindOfClass:[UITextView class]]);
+    
+    cell.layer.masksToBounds = NO;
+    cell.layer.shadowColor = [UIColor blackColor].CGColor;
+    cell.layer.shadowOpacity = .5f;
+    cell.layer.shadowOffset = CGSizeZero;
+    cell.layer.shadowRadius = 2.f;
+    cell.layer.cornerRadius = 2.f;
+    
+    if (indexPath.row == _selectedCommunity) {
+        cell.layer.shadowColor = [cell viewWithTag:CELL_BUTTON_TAG].tintColor.CGColor;
+        cell.layer.shadowRadius = 4.f;
+        cell.layer.shadowOpacity = .8f;
+    }
+    
+    titleLabel.text = @"Some Community";
+    detailView.text = @"Some information about this community.";
+    
+    return cell;
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
+    return 0;
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
+    return COLLECTION_VIEW_SPACING;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return 30;
+}
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    return 1;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
+    return CGSizeMake(150.f, 75.f);
+}
+
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+    return UIEdgeInsetsMake(COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING);
+}
+
+- (IBAction)cellTapped:(UIButton*)sender {
+    UICollectionViewCell* cell = (UICollectionViewCell*)sender.superview;
+    while (![cell isKindOfClass:[UICollectionViewCell class]]) {
+        cell = (UICollectionViewCell*)cell.superview;
+    }
+    
+    assert(cell != nil);
+    assert([cell isKindOfClass:[UICollectionViewCell class]]);
+    
+    [self updateSelectedCommunity:[_collectionView indexPathForCell:cell].row];
+}
+
+- (void)updateSelectedCommunity:(NSInteger)selectedCommunity {
+    _selectedCommunity = selectedCommunity;
+    
+    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:selectedCommunity inSection:0];
+    
+    CGFloat offset = [self collectionView:_collectionView layout:_collectionView.collectionViewLayout insetForSectionAtIndex:0].left + ([self collectionView:_collectionView layout:_collectionView.collectionViewLayout sizeForItemAtIndexPath:indexPath].width + COLLECTION_VIEW_SPACING) * selectedCommunity - [self collectionView:_collectionView layout:_collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:0];
+    
+    UICollectionViewCell* cell = [_collectionView cellForItemAtIndexPath:indexPath];
+    
+    self.navigationItem.title = ((UILabel*)[cell viewWithTag:CELL_TITLE_LABEL_TAG]).text;
+    
+    [_collectionView setContentOffset:CGPointMake(offset, 0) animated:YES];
+    
+    [_collectionView reloadData];
+}
 
 - (BOOL)hasBitcoinAddress {
     return [[PFUser currentUser][@"address"] length];
@@ -69,11 +161,12 @@ static NSString* const LocalTasksParameterName = @"postLocation";
                                     [self updateMap];
                                     [_tableView reloadData];
                                     [_refreshControl endRefreshing];
+                                    [self updateSelectedCommunity:_selectedCommunity];
                                 }];
 }
 
-- (void)refresh:(BOOL)invalidate {
-    if (invalidate) {
+- (void)refresh {
+    if (![[PFUser currentUser].username isEqualToString:_lastUsername]) {
         _tasks = nil;
         [_tableView reloadData];
     }
@@ -84,11 +177,31 @@ static NSString* const LocalTasksParameterName = @"postLocation";
 }
 
 - (void)refreshControlUsed:(id)sender {
-    [self refresh:NO];
+    [self refresh];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    [self updateSelectedCommunity:0];
+    
+    self.navigationItem.title = @"Loading...";
+    
+    _tableView.layer.masksToBounds = NO;
+    _tableView.layer.shadowColor = [UIColor blackColor].CGColor;
+    _tableView.layer.shadowOpacity = .5f;
+    _tableView.layer.shadowOffset = CGSizeZero;
+    _tableView.layer.shadowRadius = 2.f;
+    
+    _mapView.layer.masksToBounds = NO;
+    _mapView.layer.shadowColor = [UIColor blackColor].CGColor;
+    _mapView.layer.shadowOpacity = .5f;
+    _mapView.layer.shadowOffset = CGSizeZero;
+    _mapView.layer.shadowRadius = 2.f;
+
+    _collectionView.collectionViewLayout = [[PagingCollectionViewLayout alloc] init];
+    ((PagingCollectionViewLayout*)_collectionView.collectionViewLayout).scrollDirection = UICollectionViewScrollDirectionHorizontal;
+    _collectionView.decelerationRate = .1f;
     
     self.automaticallyAdjustsScrollViewInsets = NO;
     
@@ -107,7 +220,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         
         [self presentViewController:logIn animated:NO completion:nil];
     } else {
-        [self refresh:![[PFUser currentUser].username isEqualToString:_lastUsername]];
+        [self refresh];
     }
 }
 
@@ -153,7 +266,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
 
 - (NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     if (_tasks.count) {
-        return [NSString stringWithFormat:@"Local Tasks (%lu)", (unsigned long)_tasks.count];
+        return [NSString stringWithFormat:@"%lu Tasks", (unsigned long)_tasks.count];
     } else if (_tasks) {
         return @"No Local Tasks - Make Your Own!";
     } else {
@@ -185,7 +298,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:Identifier];
     }
     
-    if (_tasks) {
+    if (_tasks.count) {
         PFObject* task = _tasks[indexPath.row];
         PFGeoPoint* geoPoint = task[@"postLocation"];
         CLLocation* location = [[CLLocation alloc] initWithLatitude:geoPoint.latitude longitude:geoPoint.longitude];
@@ -194,9 +307,9 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         cell.detailTextLabel.text = [[LocationSingleton sharedSingleton] distanceTo:location];
         
         if ([task[@"poster"] isEqualToString:[PFUser currentUser].username]) {
-            cell.contentView.backgroundColor = [UIColor colorWithWhite:.9f alpha:1.f];
+            cell.imageView.image = [UIImage imageNamed:@"Star"];
         } else {
-            cell.contentView.backgroundColor = [UIColor whiteColor];
+            cell.imageView.image = nil;
         }
         
         cell.userInteractionEnabled = YES;
@@ -210,11 +323,17 @@ static NSString* const LocalTasksParameterName = @"postLocation";
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return _tasks ? _tasks.count : 1;
+    return _tasks.count ? _tasks.count : 1;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    [self refresh];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {

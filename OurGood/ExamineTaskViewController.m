@@ -43,8 +43,9 @@
     
     cell.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255) / (CGFloat)255 green:arc4random_uniform(255) / (CGFloat)255 blue:arc4random_uniform(255) / (CGFloat)255 alpha:1.f];
     
-    cell.layer.cornerRadius = 25.f;
+    cell.layer.cornerRadius = [self collectionView:collectionView layout:collectionView.collectionViewLayout sizeForItemAtIndexPath:indexPath].width / 2.f;
     
+    cell.layer.masksToBounds = NO;
     cell.layer.shadowOffset = CGSizeZero;
     cell.layer.shadowOpacity = 1.f;
     cell.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -238,6 +239,7 @@
     
     // Filler image
     _imageView.image = [UIImage imageNamed:@"Pothole.jpg"];
+    _imageView.layer.cornerRadius = 2.f;
     
     // _descriptionTextView.text = _task[@"description"];
     _descriptionTextView.text = @"Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.";
