@@ -21,7 +21,7 @@
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
-    return 0;
+    return COLLECTION_VIEW_SPACING;
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
@@ -34,6 +34,10 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
     return 1;
+}
+
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+    return UIEdgeInsetsMake(COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING);
 }
 
 - (UICollectionViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -49,7 +53,7 @@
     cell.layer.shadowOffset = CGSizeZero;
     cell.layer.shadowOpacity = 1.f;
     cell.layer.shadowColor = [UIColor blackColor].CGColor;
-    cell.layer.shadowRadius = 2.f;
+    cell.layer.shadowRadius = 1.f;
     cell.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:cell.bounds byRoundingCorners:UIRectCornerAllCorners cornerRadii:CGSizeMake(25.f, 25.f)].CGPath;
     
     return cell;
@@ -261,19 +265,19 @@
     });
     
     _imageView.layer.shadowColor = [UIColor blackColor].CGColor;
-    _imageView.layer.shadowOpacity = 1.f;
+    _imageView.layer.shadowOpacity = .5f;
     _imageView.layer.shadowOffset = CGSizeZero;
-    _imageView.layer.shadowRadius = 2.f;
+    _imageView.layer.shadowRadius = 1.f;
     
     _labelContainer.layer.shadowColor = [UIColor blackColor].CGColor;
     _labelContainer.layer.shadowOpacity = .5f;
     _labelContainer.layer.shadowOffset = CGSizeZero;
-    _labelContainer.layer.shadowRadius = 3.f;
+    _labelContainer.layer.shadowRadius = 1.f;
     
     _collectionContainer.layer.shadowColor = [UIColor blackColor].CGColor;
     _collectionContainer.layer.shadowOpacity = .5f;
     _collectionContainer.layer.shadowOffset = CGSizeZero;
-    _collectionContainer.layer.shadowRadius = 3.f;
+    _collectionContainer.layer.shadowRadius = 1.f;
     
     if ([_task[@"claimed"] boolValue]) {
         [self claimTask_UI];

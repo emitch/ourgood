@@ -49,13 +49,13 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     cell.layer.shadowColor = [UIColor blackColor].CGColor;
     cell.layer.shadowOpacity = .5f;
     cell.layer.shadowOffset = CGSizeZero;
-    cell.layer.shadowRadius = 2.f;
+    cell.layer.shadowRadius = 1.f;
     cell.layer.cornerRadius = 2.f;
     
     if (indexPath.row == _selectedCommunity) {
         cell.layer.shadowColor = [cell viewWithTag:CELL_BUTTON_TAG].tintColor.CGColor;
-        cell.layer.shadowRadius = 4.f;
-        cell.layer.shadowOpacity = .8f;
+        cell.layer.shadowRadius = 2.f;
+        cell.layer.shadowOpacity = 1.f;
     }
     
     titleLabel.text = @"Some Community";
@@ -191,13 +191,13 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     _tableView.layer.shadowColor = [UIColor blackColor].CGColor;
     _tableView.layer.shadowOpacity = .5f;
     _tableView.layer.shadowOffset = CGSizeZero;
-    _tableView.layer.shadowRadius = 2.f;
+    _tableView.layer.shadowRadius = 1.f;
     
     _mapView.layer.masksToBounds = NO;
     _mapView.layer.shadowColor = [UIColor blackColor].CGColor;
     _mapView.layer.shadowOpacity = .5f;
     _mapView.layer.shadowOffset = CGSizeZero;
-    _mapView.layer.shadowRadius = 2.f;
+    _mapView.layer.shadowRadius = 1.f;
 
     _collectionView.collectionViewLayout = [[PagingCollectionViewLayout alloc] init];
     ((PagingCollectionViewLayout*)_collectionView.collectionViewLayout).scrollDirection = UICollectionViewScrollDirectionHorizontal;

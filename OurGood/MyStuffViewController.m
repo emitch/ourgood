@@ -227,7 +227,7 @@ static NSString* const AddressKey = @"address";
                                                 [PFUser currentUser][GUIDKey] = response[GUIDKey];
                                                 [PFUser currentUser][AddressKey] = response[AddressKey];
                                                 
-                                                [_bcAddressButton setTitle:@"฿itcoin linked \u2713" forState:UIControlStateNormal];
+                                                [_bcAddressButton setTitle:@"Payment linked \u2713" forState:UIControlStateNormal];
                                             }
                                             
                                             
@@ -277,12 +277,12 @@ static NSString* const AddressKey = @"address";
     
     [_tableView reloadData];
     
-    _usernameLabel.text = [NSString stringWithFormat:@"u: %@", [PFUser currentUser].username];
+    _usernameLabel.text = [PFUser currentUser].username;
     
     [self refresh:![[PFUser currentUser].username isEqualToString:_lastUsername]];
     
     if ([self hasBitcoinAddress]) {
-        [_bcAddressButton setTitle:@"฿itcoin linked \u2713" forState:UIControlStateNormal];
+        [_bcAddressButton setTitle:@"Payment linked \u2713" forState:UIControlStateNormal];
     }
 }
 
@@ -294,6 +294,19 @@ static NSString* const AddressKey = @"address";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    _imageView.layer.masksToBounds = NO;
+    _imageView.layer.shadowColor = [UIColor blackColor].CGColor;
+    _imageView.layer.shadowOpacity = .5f;
+    _imageView.layer.shadowOffset = CGSizeZero;
+    _imageView.layer.shadowRadius = 1.f;
+    _imageView.layer.cornerRadius = 2.f;
+    
+    _tableView.layer.masksToBounds = NO;
+    _tableView.layer.shadowColor = [UIColor blackColor].CGColor;
+    _tableView.layer.shadowOpacity = .5f;
+    _tableView.layer.shadowOffset = CGSizeZero;
+    _tableView.layer.shadowRadius = 1.f;
     
     _usernameLabel.adjustsFontSizeToFitWidth = YES;
     
@@ -314,7 +327,7 @@ static NSString* const AddressKey = @"address";
         PFObject* task = _posted[indexPath.row];
         
         if ([_posted[indexPath.row][@"claimed"] boolValue]) {
-            UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Release Funds?" message:[NSString stringWithFormat:@"Has this task been completed? If so, we can release the funds to the claimee, u: %@", _posted[indexPath.row][@"claimee"]] preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Release Funds?" message:[NSString stringWithFormat:@"Has this task been completed? If so, we can release the funds to the claimee, %@", _posted[indexPath.row][@"claimee"]] preferredStyle:UIAlertControllerStyleAlert];
             [alertController addAction:[UIAlertAction actionWithTitle:@"Release" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
                 [self dismissViewControllerAnimated:YES completion:nil];
                 UIAlertController* loading = [UIAlertController alertControllerWithTitle:@"Releasing..." message:@"" preferredStyle:UIAlertControllerStyleAlert];
