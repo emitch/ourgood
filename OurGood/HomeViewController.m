@@ -35,7 +35,7 @@ static NSString* const GetLocalTasksFunction = @"getLocalTasks";
 static NSString* const LocalTasksParameterName = @"postLocation";
 
 - (UICollectionViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString* const Identifier = @"CommunityCell";
+    static NSString* const Identifier = @"SimpleCell";
     
     UICollectionViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:Identifier forIndexPath:indexPath];
     
@@ -43,7 +43,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     UITextView* detailView = [cell viewWithTag:CELL_DETAIL_VIEW_TAG];
     
     assert([titleLabel isKindOfClass:[UILabel class]]);
-    assert([detailView isKindOfClass:[UITextView class]]);
+    //assert([detailView isKindOfClass:[UITextView class]]);
     
     cell.layer.masksToBounds = NO;
     cell.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -58,7 +58,13 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         cell.layer.shadowOpacity = 1.f;
     }
     
-    titleLabel.text = @"Some Community";
+    NSArray* communities = @[@"Cannon Club", @"Sigma Chi Fraternity", @"Buena Vista", @"Forsyth Country Day School", @"Princeton University", @"University of Pennsylvania", @"Georgia Tech"];
+    
+    if (indexPath.row < [communities count]) {
+        titleLabel.text = communities[indexPath.row];
+    } else {
+        titleLabel.text = @"Some Community";
+    }
     detailView.text = @"Some information about this community.";
     
     return cell;
@@ -81,7 +87,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
-    return CGSizeMake(150.f, 75.f);
+    return CGSizeMake(150.f, 30.f);
 }
 
 - (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
@@ -105,14 +111,13 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     
     NSIndexPath* indexPath = [NSIndexPath indexPathForItem:selectedCommunity inSection:0];
     
-    CGFloat offset = [self collectionView:_collectionView layout:_collectionView.collectionViewLayout insetForSectionAtIndex:0].left + ([self collectionView:_collectionView layout:_collectionView.collectionViewLayout sizeForItemAtIndexPath:indexPath].width + COLLECTION_VIEW_SPACING) * selectedCommunity - [self collectionView:_collectionView layout:_collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:0];
+    CGFloat offset = [self collectionView:_collectionView layout:_collectionView.collectionViewLayout insetForSectionAtIndex:0].left + ([self collectionView:_collectionView layout:_collectionView.collectionViewLayout sizeForItemAtIndexPath:indexPath].width + COLLECTION_VIEW_SPACING) * (selectedCommunity / 2) - [self collectionView:_collectionView layout:_collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:0];
     
     UICollectionViewCell* cell = [_collectionView cellForItemAtIndexPath:indexPath];
     
     self.navigationItem.title = ((UILabel*)[cell viewWithTag:CELL_TITLE_LABEL_TAG]).text;
     
     [_collectionView setContentOffset:CGPointMake(offset, 0) animated:YES];
-    
     [_collectionView reloadData];
 }
 
