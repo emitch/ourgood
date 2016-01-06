@@ -63,14 +63,11 @@
     return [[PFUser currentUser][@"address"] length];
 }
 
-- (void)setTask:(PFObject *)task {
-    _task = task;
-    
-    _contributions = task[@"committedPayments"];
-    _myContribution = 0;
-    
-    for (PFObject* payment in task[@"committedPayments"]) {
-        [payment fetchIfNeeded];
+- (void)updateValue {
+    for (PFObject* payment in _task[@"committedPayments"]) {
+        if ([payment respondsToSelector:@selector(fetchIfNeeded)])
+            [payment fetchIfNeeded];
+        
         _totalValue += [payment[@"amount"] integerValue];
         
         if ([payment[@"username"] isEqualToString:[PFUser currentUser].username]) {
@@ -78,6 +75,15 @@
             _myContribution += [payment[@"amount"] intValue];
         }
     }
+}
+
+- (void)setTask:(PFObject *)task {
+    _task = task;
+    
+    _contributions = task[@"committedPayments"];
+    _myContribution = 0;
+    
+    [self updateValue];
 }
 
 - (IBAction)helpButtonPressed:(id)sender {
@@ -145,7 +151,7 @@
 }
 
 - (IBAction)contributePressed:(id)sender {
-    if ([self hasBitcoinAddress]) {
+//    if ([self hasBitcoinAddress]) {
         UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"How much would you like to contribute?" message:@"" preferredStyle:UIAlertControllerStyleAlert];
         [alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
             textField.keyboardType = UIKeyboardTypeNumberPad;
@@ -181,9 +187,15 @@
                     
                     [[PFUser currentUser] saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
                         [saving setTitle:@"Contribution Sent!"];
+                        [saving setMessage:nil];
+                        
+                        _myContribution += [newPayment[@"amount"] intValue];
+                        _yourContributionLabel.text = [NSString stringWithFormat:@"$%ld", (long)_myContribution];
+                        
+                        _totalValue += [newPayment[@"amount"] intValue];
+                        _valueLabel.text = [NSString stringWithFormat:@"$%ld", (long)_totalValue];
+                        
                         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                            _myContribution += [newPayment[@"amount"] intValue];
-                            _yourContributionLabel.text = [NSString stringWithFormat:@"$%ld", (long)_myContribution];
                             [self dismissViewControllerAnimated:YES completion:nil];
                         });
                     }];
@@ -196,13 +208,13 @@
         contribute.enabled = NO;
         [alertController addAction:contribute];
         [self presentViewController:alertController animated:YES completion:nil];
-    } else {
-        UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"No Bitcoin Address" message:@"You must add or create a Bitcoin address in My Stuff before posting a new task." preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-        [alertController addAction:cancelAction];
-        
-        [self presentViewController:alertController animated:YES completion:nil];
-    }
+//    } else {
+//        UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"No Bitcoin Address" message:@"You must add or create a Bitcoin address in My Stuff before posting a new task." preferredStyle:UIAlertControllerStyleAlert];
+//        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+//        [alertController addAction:cancelAction];
+//        
+//        [self presentViewController:alertController animated:YES completion:nil];
+//    }
 }
 
 - (void)claimTask_UI {

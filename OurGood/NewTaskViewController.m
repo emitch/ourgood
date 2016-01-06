@@ -96,20 +96,20 @@
         [object saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
             NSLog(@"perfoming BC transfer");
             
-            NSString* transferURLString = @"https://blockchain.info/merchant/$guid/payment?password=$main_password&to=$address&amount=$amount&from=$from&api_key=$api_key";
-            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$from" withString:[PFUser currentUser][@"address"]];
-            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$amount" withString:[NSString stringWithFormat:@"%i", (int)(contribution / [self BCtoUSD] * BC_TO_SATOSHI)]];
-            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$address" withString:APP_MONEY_BOX_ADDRESS];
-            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$main_password" withString:[PFUser currentUser][@"walletPassword"]];
-            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$guid" withString:[PFUser currentUser][@"guid"]];
-            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$api_key" withString:BLOCKCHAIN_API_KEY];
-            
-            NSLog(@"%@", transferURLString);
-            
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-                NSString* transferResponse = [[NSString alloc] initWithContentsOfURL:[NSURL URLWithString:transferURLString] encoding:NSUTF8StringEncoding error:nil];
-                NSDictionary* responseDictionary = [NSJSONSerialization JSONObjectWithData:[transferResponse dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:nil];
-                if (responseDictionary[@"tx_hash"]) {
+//            NSString* transferURLString = @"https://blockchain.info/merchant/$guid/payment?password=$main_password&to=$address&amount=$amount&from=$from&api_key=$api_key";
+//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$from" withString:[PFUser currentUser][@"address"]];
+//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$amount" withString:[NSString stringWithFormat:@"%i", (int)(contribution / [self BCtoUSD] * BC_TO_SATOSHI)]];
+//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$address" withString:APP_MONEY_BOX_ADDRESS];
+//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$main_password" withString:[PFUser currentUser][@"walletPassword"]];
+//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$guid" withString:[PFUser currentUser][@"guid"]];
+//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$api_key" withString:BLOCKCHAIN_API_KEY];
+//            
+//            NSLog(@"%@", transferURLString);
+//            
+//            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+//                NSString* transferResponse = [[NSString alloc] initWithContentsOfURL:[NSURL URLWithString:transferURLString] encoding:NSUTF8StringEncoding error:nil];
+//                NSDictionary* responseDictionary = [NSJSONSerialization JSONObjectWithData:[transferResponse dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:nil];
+//                if (responseDictionary[@"tx_hash"]) {
                     //successful transfer to middle man
                     dispatch_async(dispatch_get_main_queue(), ^{
                         NSLog(@"updating user data");
@@ -144,21 +144,20 @@
                             }];
                         }];
                     });
-                } else {
-                    [object delete];
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self dismissViewControllerAnimated:YES completion:^{
-                            UIAlertController* error = [UIAlertController alertControllerWithTitle:@"Error Transferring Funds" message:transferResponse preferredStyle:UIAlertControllerStyleAlert];
-                            UIAlertAction* action = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-                            [error addAction:action];
-                            
-                            [self presentViewController:error animated:YES completion:nil];
-                        }];
-                    });
-                }
-            });
-            
+//                } else {
+//                    [object delete];
+//                    
+//                    dispatch_async(dispatch_get_main_queue(), ^{
+//                        [self dismissViewControllerAnimated:YES completion:^{
+//                            UIAlertController* error = [UIAlertController alertControllerWithTitle:@"Error Transferring Funds" message:transferResponse preferredStyle:UIAlertControllerStyleAlert];
+//                            UIAlertAction* action = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+//                            [error addAction:action];
+//                            
+//                            [self presentViewController:error animated:YES completion:nil];
+//                        }];
+//                    });
+//                }
+//            });
         }];
     }];
     
