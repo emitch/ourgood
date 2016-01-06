@@ -24,10 +24,10 @@
 		07E0E0C21C3495FF00E7958C /* MenuTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E0E0C11C3495FF00E7958C /* MenuTableViewController.m */; };
 		07E8515E1C34D339007C8F7A /* PagingCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E8515D1C34D339007C8F7A /* PagingCollectionViewLayout.m */; };
 		3B1D50738CCD4A9B39D24584 /* libPods-OurGood.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41CF33BB84700328BDD24CC5 /* libPods-OurGood.a */; };
-		878BC32A1C2BC22D006D1974 /* .parse.local in Resources */ = {isa = PBXBuildFile; fileRef = 878BC3241C2BC22D006D1974 /* .parse.local */; };
-		878BC32B1C2BC22D006D1974 /* .parse.project in Resources */ = {isa = PBXBuildFile; fileRef = 878BC3251C2BC22D006D1974 /* .parse.project */; };
-		878BC32C1C2BC22D006D1974 /* main.js in Resources */ = {isa = PBXBuildFile; fileRef = 878BC3271C2BC22D006D1974 /* main.js */; };
-		878BC32D1C2BC22D006D1974 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = 878BC3291C2BC22D006D1974 /* index.html */; };
+		8779186B1C3C6B7C003A4942 /* .parse.local in Resources */ = {isa = PBXBuildFile; fileRef = 877918651C3C6B7C003A4942 /* .parse.local */; };
+		8779186C1C3C6B7C003A4942 /* .parse.project in Resources */ = {isa = PBXBuildFile; fileRef = 877918661C3C6B7C003A4942 /* .parse.project */; };
+		8779186D1C3C6B7C003A4942 /* main.js in Resources */ = {isa = PBXBuildFile; fileRef = 877918681C3C6B7C003A4942 /* main.js */; };
+		8779186E1C3C6B7C003A4942 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = 8779186A1C3C6B7C003A4942 /* index.html */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,11 +82,11 @@
 		07E8515D1C34D339007C8F7A /* PagingCollectionViewLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PagingCollectionViewLayout.m; sourceTree = "<group>"; };
 		41CF33BB84700328BDD24CC5 /* libPods-OurGood.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OurGood.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BD879133B624D6C7163A963 /* Pods-OurGood.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OurGood.release.xcconfig"; path = "Pods/Target Support Files/Pods-OurGood/Pods-OurGood.release.xcconfig"; sourceTree = "<group>"; };
+		877918651C3C6B7C003A4942 /* .parse.local */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .parse.local; sourceTree = "<group>"; };
+		877918661C3C6B7C003A4942 /* .parse.project */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .parse.project; sourceTree = "<group>"; };
+		877918681C3C6B7C003A4942 /* main.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = main.js; sourceTree = "<group>"; };
+		8779186A1C3C6B7C003A4942 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		878BC3211C2BAB77006D1974 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
-		878BC3241C2BC22D006D1974 /* .parse.local */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .parse.local; sourceTree = "<group>"; };
-		878BC3251C2BC22D006D1974 /* .parse.project */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .parse.project; sourceTree = "<group>"; };
-		878BC3271C2BC22D006D1974 /* main.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = main.js; sourceTree = "<group>"; };
-		878BC3291C2BC22D006D1974 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		BB678B35EDE9694D6131789A /* Pods-OurGood.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OurGood.debug.xcconfig"; path = "Pods/Target Support Files/Pods-OurGood/Pods-OurGood.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -119,6 +119,7 @@
 		07AEB6231C2BA0C400E5F41A = {
 			isa = PBXGroup;
 			children = (
+				877918641C3C6B7C003A4942 /* ParseCloudCode */,
 				07AEB62E1C2BA0C400E5F41A /* OurGood */,
 				07AEB64B1C2BA0C400E5F41A /* OurGoodTests */,
 				07AEB6561C2BA0C400E5F41A /* OurGoodUITests */,
@@ -158,7 +159,6 @@
 			children = (
 				07070A611C2BA50B008D5151 /* Assets.xcassets */,
 				07AEB6431C2BA0C400E5F41A /* Info.plist */,
-				878BC3231C2BC22D006D1974 /* cloud */,
 				07AEB6301C2BA0C400E5F41A /* main.m */,
 			);
 			name = "Supporting Files";
@@ -262,29 +262,30 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		878BC3231C2BC22D006D1974 /* cloud */ = {
+		877918641C3C6B7C003A4942 /* ParseCloudCode */ = {
 			isa = PBXGroup;
 			children = (
-				878BC3241C2BC22D006D1974 /* .parse.local */,
-				878BC3251C2BC22D006D1974 /* .parse.project */,
-				878BC3261C2BC22D006D1974 /* cloud */,
-				878BC3281C2BC22D006D1974 /* public */,
+				877918651C3C6B7C003A4942 /* .parse.local */,
+				877918661C3C6B7C003A4942 /* .parse.project */,
+				877918671C3C6B7C003A4942 /* cloud */,
+				877918691C3C6B7C003A4942 /* public */,
+			);
+			name = ParseCloudCode;
+			path = OurGoodUITests/ParseCloudCode;
+			sourceTree = "<group>";
+		};
+		877918671C3C6B7C003A4942 /* cloud */ = {
+			isa = PBXGroup;
+			children = (
+				877918681C3C6B7C003A4942 /* main.js */,
 			);
 			path = cloud;
 			sourceTree = "<group>";
 		};
-		878BC3261C2BC22D006D1974 /* cloud */ = {
+		877918691C3C6B7C003A4942 /* public */ = {
 			isa = PBXGroup;
 			children = (
-				878BC3271C2BC22D006D1974 /* main.js */,
-			);
-			path = cloud;
-			sourceTree = "<group>";
-		};
-		878BC3281C2BC22D006D1974 /* public */ = {
-			isa = PBXGroup;
-			children = (
-				878BC3291C2BC22D006D1974 /* index.html */,
+				8779186A1C3C6B7C003A4942 /* index.html */,
 			);
 			path = public;
 			sourceTree = "<group>";
@@ -409,13 +410,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				878BC32D1C2BC22D006D1974 /* index.html in Resources */,
 				07070A801C2BA521008D5151 /* Main.storyboard in Resources */,
 				07070A741C2BA50B008D5151 /* Assets.xcassets in Resources */,
-				878BC32A1C2BC22D006D1974 /* .parse.local in Resources */,
-				878BC32C1C2BC22D006D1974 /* main.js in Resources */,
 				07070A7F1C2BA521008D5151 /* LaunchScreen.storyboard in Resources */,
-				878BC32B1C2BC22D006D1974 /* .parse.project in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -430,6 +427,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8779186D1C3C6B7C003A4942 /* main.js in Resources */,
+				8779186E1C3C6B7C003A4942 /* index.html in Resources */,
+				8779186C1C3C6B7C003A4942 /* .parse.project in Resources */,
+				8779186B1C3C6B7C003A4942 /* .parse.local in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

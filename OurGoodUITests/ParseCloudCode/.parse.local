@@ -1,0 +1,10 @@
+{
+  "applications": {
+    "_default": {
+      "link": "communitypost"
+    },
+    "communitypost": {
+      "applicationId": "0hz4j6BrGaetCfwsK4aQ0uzVJVgyXtQUf5y04VwB"
+    }
+  }
+}

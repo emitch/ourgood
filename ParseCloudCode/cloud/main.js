@@ -5,6 +5,21 @@ Parse.Cloud.define('hello', function(request, response) {
     response.success('Hello world!');
 });
 
+Parse.Cloud.define('getUserCommunities', function (request, response) {
+    var query = new Parse.Query('Community');
+    var user = request.params.user
+
+
+    query.find().then(function(communities) {
+        var results = [];
+
+        var userIn = request.params.communities;
+        for (var i = 0; i < communities.length; i++) {
+
+        }
+    })
+});
+
 Parse.Cloud.define('getLocalTasks', function(request, response) {
     var query = new Parse.Query('Posting');
     query.find().then(function(posts) {
