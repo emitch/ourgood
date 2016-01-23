@@ -8,6 +8,7 @@
 
 @import Foundation;
 @import MapKit;
+
 #import <Parse/Parse.h>
 
 @interface LocationAnnotation : NSObject<MKAnnotation>

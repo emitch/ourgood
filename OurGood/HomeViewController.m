@@ -18,6 +18,10 @@
 @interface HomeViewController ()
 
 @property (nonatomic) NSInteger selectedCommunity;
+@property (nonatomic, strong) NSArray* communities;
+@property (nonatomic, strong) NSArray* downloadedCommunities;
+@property (nonatomic, strong) NSDictionary* tasks;
+@property (nonatomic, strong) NSMutableDictionary* downloadedTasks;
 
 @end
 
@@ -28,22 +32,60 @@
 #define COLLECTION_VIEW_SPACING 8.f
 
 #define CELL_TITLE_LABEL_TAG    1
-#define CELL_DETAIL_VIEW_TAG    2
 #define CELL_BUTTON_TAG         3
 
 static NSString* const GetLocalTasksFunction = @"getLocalTasks";
 static NSString* const LocalTasksParameterName = @"postLocation";
 
+- (UIColor*)colorForCommunity:(PFObject*)community {
+    assert(community != nil);
+    
+    static const NSInteger NumColors = 20;
+    static const CGFloat WheelSize = 360.f;
+    static NSMutableArray* colors = nil;
+    
+    if (!colors) {
+        colors = [[NSMutableArray alloc] init];
+        
+        for (int idx = 0; idx < WheelSize; idx += WheelSize / NumColors) {
+            UIColor* color = [UIColor colorWithHue:idx / WheelSize saturation:1.f brightness:1.f alpha:1.f];
+            [colors addObject:color];
+        }
+    }
+    
+    NSInteger index = [_communities indexOfObject:community];
+    
+    assert(index >= 0);
+    
+    return colors[index % NumColors];
+}
+
+- (NSArray*)tasksForCommunity:(PFObject*)community {
+    assert(community != nil);
+    
+    if (_tasks == nil) return nil;
+    
+    return _tasks[community.objectId];
+}
+
+- (NSArray*)tasksForCurrentCommunity {
+    if (!_communities.count) return nil;
+    
+    assert(_selectedCommunity >= 0);
+    assert(_selectedCommunity < _communities.count);
+    
+    return [self tasksForCommunity:_communities[_selectedCommunity]];
+}
+
 - (UICollectionViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    assert(indexPath.row <= [_communities count]);
+    
     static NSString* const Identifier = @"SimpleCell";
     
     UICollectionViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:Identifier forIndexPath:indexPath];
     
     UILabel* titleLabel = [cell viewWithTag:CELL_TITLE_LABEL_TAG];
-    UITextView* detailView = [cell viewWithTag:CELL_DETAIL_VIEW_TAG];
-    
     assert([titleLabel isKindOfClass:[UILabel class]]);
-    //assert([detailView isKindOfClass:[UITextView class]]);
     
     cell.layer.masksToBounds = NO;
     cell.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -52,20 +94,22 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     cell.layer.shadowRadius = 1.f;
     cell.layer.cornerRadius = 2.f;
     
-    if (indexPath.row == _selectedCommunity) {
-        cell.layer.shadowColor = [cell viewWithTag:CELL_BUTTON_TAG].tintColor.CGColor;
+    if (indexPath.row < [_communities count]) {
+        if (indexPath.row == _selectedCommunity) {
+            cell.layer.shadowColor = [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0].CGColor;
+            cell.layer.shadowRadius = 2.f;
+            cell.layer.shadowOpacity = 1.f;
+        }
+        
+        titleLabel.text = _communities[indexPath.row][@"name"];
+    } else {
+        titleLabel.text = @"Create Community...";
+        
+        cell.layer.shadowColor = [UIColor greenColor].CGColor;
         cell.layer.shadowRadius = 2.f;
         cell.layer.shadowOpacity = 1.f;
     }
     
-    NSArray* communities = @[@"Cannon Club", @"Sigma Chi Fraternity", @"Buena Vista", @"Forsyth Country Day School", @"Princeton University", @"University of Pennsylvania", @"Georgia Tech"];
-    
-    if (indexPath.row < [communities count]) {
-        titleLabel.text = communities[indexPath.row];
-    } else {
-        titleLabel.text = @"Some Community";
-    }
-    detailView.text = @"Some information about this community.";
     
     return cell;
 }
@@ -79,7 +123,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return 30;
+    return _communities ? _communities.count + 1 : 0;
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
@@ -94,6 +138,18 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     return UIEdgeInsetsMake(COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING);
 }
 
+- (void)textFieldChanged:(UITextField*)sender {
+    UIResponder* responder = sender;
+    while (![responder isKindOfClass:[UIAlertController class]]) {
+        responder = [responder nextResponder];
+    }
+    
+    assert(responder != nil);
+    
+    UIAlertController* alert = (UIAlertController*)responder;
+    alert.actions[1].enabled = sender.text.length != 0;
+}
+
 - (IBAction)cellTapped:(UIButton*)sender {
     UICollectionViewCell* cell = (UICollectionViewCell*)sender.superview;
     while (![cell isKindOfClass:[UICollectionViewCell class]]) {
@@ -103,32 +159,123 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     assert(cell != nil);
     assert([cell isKindOfClass:[UICollectionViewCell class]]);
     
-    [self updateSelectedCommunity:[_collectionView indexPathForCell:cell].row];
+    NSInteger index = [_collectionView indexPathForCell:cell].row;
+    
+    if (index < [_communities count]) {
+        [self updateSelectedCommunity:index];
+    } else {
+        UIAlertController* newCommunityAlert = [UIAlertController alertControllerWithTitle:@"New Community" message:nil preferredStyle:UIAlertControllerStyleAlert];
+        [newCommunityAlert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+            textField.placeholder = @"New Community Name";
+            [textField addTarget:self action:@selector(textFieldChanged:) forControlEvents:UIControlEventEditingChanged];
+        }];
+        
+        [newCommunityAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+        
+        UIAlertAction* addAction = [UIAlertAction actionWithTitle:@"Create" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            PFObject* newCommunity = [PFObject objectWithClassName:@"Community"];
+            newCommunity[@"creator"] = [PFUser currentUser];
+            newCommunity[@"name"] = newCommunityAlert.textFields[0].text;
+            
+            UIAlertController* saving = [UIAlertController alertControllerWithTitle:@"Creating New Community..." message:nil preferredStyle:UIAlertControllerStyleAlert];
+            [self presentViewController:saving animated:YES completion:nil];
+            
+            [newCommunity saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
+                [self dismissViewControllerAnimated:YES completion:nil];
+                if (error) {
+                    NSLog(@"ERROR SAVING NEW COMMUNITY: %@", error.localizedDescription);
+                    UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Error Creating Community" message:error.localizedFailureReason preferredStyle:UIAlertControllerStyleAlert];
+                    [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+                    
+                    return;
+                }
+                
+                [[[PFUser currentUser] relationForKey:@"communities"] addObject:newCommunity];
+                [[PFUser currentUser] saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
+                    if (error) {
+                        NSLog(@"ERROR SAVING NEW COMMUNITY: %@", error.localizedDescription);
+                        UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Error Creating Community" message:error.localizedFailureReason preferredStyle:UIAlertControllerStyleAlert];
+                        [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+                        
+                        return;
+                    }
+                    
+                    _communities = [_communities arrayByAddingObject:newCommunity];
+                    
+                    NSMutableDictionary* newTasks = [NSMutableDictionary dictionaryWithDictionary:_tasks];
+                    newTasks[newCommunity.objectId] = @[];
+                    _tasks = newTasks;
+                    
+                    [self updateSelectedCommunity:[_communities count] - 1];
+                    
+                    UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Community Created!" message:nil preferredStyle:UIAlertControllerStyleAlert];
+                    [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+                }];
+            }];
+        }];
+        
+        addAction.enabled = NO;
+        
+        [newCommunityAlert addAction:addAction];
+        
+        [self presentViewController:newCommunityAlert animated:YES completion:nil];
+    }
 }
 
 - (void)updateSelectedCommunity:(NSInteger)selectedCommunity {
+    if (!_communities.count) {
+        if (_communities) {
+            self.navigationItem.title = @"No Communities - Add One!";
+        }
+        
+        [_collectionView reloadData];
+        [_tableView reloadData];
+        
+        return;
+    }
+    
+    assert(_selectedCommunity < _communities.count);
+    
     _selectedCommunity = selectedCommunity;
     
     NSIndexPath* indexPath = [NSIndexPath indexPathForItem:selectedCommunity inSection:0];
     
-    CGFloat offset = [self collectionView:_collectionView layout:_collectionView.collectionViewLayout insetForSectionAtIndex:0].left + ([self collectionView:_collectionView layout:_collectionView.collectionViewLayout sizeForItemAtIndexPath:indexPath].width + COLLECTION_VIEW_SPACING) * (selectedCommunity / 2) - [self collectionView:_collectionView layout:_collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:0];
-    
     UICollectionViewCell* cell = [_collectionView cellForItemAtIndexPath:indexPath];
     
-    self.navigationItem.title = ((UILabel*)[cell viewWithTag:CELL_TITLE_LABEL_TAG]).text;
+    self.navigationItem.title = [NSString stringWithFormat:@"Tasks in '%@'", _communities[_selectedCommunity][@"name"]];
+    
+    [_collectionView reloadData];
+    [_tableView reloadData];
+    
+    if (CGRectContainsRect(self.view.frame, [self.view convertRect:cell.frame fromCoordinateSpace:cell.superview])) {
+        return;
+    }
+    
+    CGFloat offset = [self collectionView:_collectionView layout:_collectionView.collectionViewLayout insetForSectionAtIndex:0].left + ([self collectionView:_collectionView layout:_collectionView.collectionViewLayout sizeForItemAtIndexPath:indexPath].width + COLLECTION_VIEW_SPACING) * (selectedCommunity / 2) - [self collectionView:_collectionView layout:_collectionView.collectionViewLayout minimumLineSpacingForSectionAtIndex:0];
     
     [_collectionView setContentOffset:CGPointMake(offset, 0) animated:YES];
-    [_collectionView reloadData];
 }
 
 - (BOOL)hasBitcoinAddress {
     return [[PFUser currentUser][@"address"] length];
 }
 
+- (void)reloadUI {
+    [self updateSelectedCommunity:_selectedCommunity];
+    
+    [self updateMap];
+}
+
 - (void)updateMap {
     [_mapView removeAnnotations:_mapView.annotations];
     
-    for (PFObject* object in _tasks) {
+    NSMutableArray* allTasks = [[NSMutableArray alloc] init];
+    
+    for (NSArray* tasks in [_tasks allValues]) {
+        [allTasks addObjectsFromArray:tasks];
+    }
+    
+    for (PFObject* object in allTasks) {
         LocationAnnotation* ann = [[LocationAnnotation alloc] init];
         ann.task = object;
         
@@ -141,43 +288,64 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     [_mapView showAnnotations:_mapView.annotations animated:YES];
 }
 
-- (void)retrieveLocalTasks {
-    if (![[LocationSingleton sharedSingleton] geoPoint]) {
-        UIAlertController* locationAlert = [UIAlertController alertControllerWithTitle:@"Couldn't Get Location" message:@"We're still trying to get your location. Try again in a few seconds." preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-        [locationAlert addAction:cancel];
+- (void)retrieveTasks {
+    PFRelation* communitiesRelation = [[PFUser currentUser] relationForKey:@"communities"];
+    PFQuery* communitiesQuery = [communitiesRelation query];
+    
+    [communitiesQuery findObjectsInBackgroundWithBlock:^(NSArray * _Nullable objects, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"ERROR RETRIEVING USER'S COMMUNITIES: %@", error.localizedDescription);
+            return;
+        }
         
-        [self presentViewController:locationAlert animated:YES completion:nil];
-        [_refreshControl endRefreshing];
-        return;
-    }
-    
-    NSDictionary* userTasksParameters = @{LocalTasksParameterName: [[LocationSingleton sharedSingleton] geoPoint]};
-    
-    [PFCloud callFunctionInBackground:GetLocalTasksFunction
-                       withParameters:userTasksParameters
-                                block:^(id  _Nullable object, NSError * _Nullable error) {
-                                    if (error) {
-                                        NSLog(@"Error for posted: %@", error);
-                                    }
-                                    
-                                    _tasks = object;
-                                    
-                                    [self updateMap];
-                                    [_tableView reloadData];
-                                    [_refreshControl endRefreshing];
-                                    [self updateSelectedCommunity:_selectedCommunity];
-                                }];
+        _downloadedCommunities = objects;
+        _downloadedTasks = [[NSMutableDictionary alloc] init];
+        
+        for (PFObject* community in _downloadedCommunities) {
+            PFQuery* taskQuery = [PFQuery queryWithClassName:@"Task"];
+            [taskQuery whereKey:@"community" equalTo:community];
+            
+            [taskQuery findObjectsInBackgroundWithBlock:^(NSArray * _Nullable tasks, NSError * _Nullable error) {
+                if (error) {
+                    NSLog(@"ERROR RETRIEVING COMMUNITY %@'S TASKS: %@", community[@"name"], error.localizedDescription);
+                    return;
+                }
+                
+                _downloadedTasks[community.objectId] = tasks;
+                
+                if ([[_downloadedTasks allKeys] count] == [_downloadedCommunities count]) {
+                    _communities = _downloadedCommunities;
+                    _tasks = _downloadedTasks;
+                    
+                    _downloadedTasks = nil;
+                    _downloadedCommunities = nil;
+                    
+                    
+                    [self reloadUI];
+                }
+            }];
+        }
+        
+        NSLog(@"%@", _downloadedCommunities);
+        
+        if (![_downloadedCommunities count]) {
+            _communities = _downloadedCommunities;
+            _tasks = _downloadedTasks;
+            [self reloadUI];
+        }
+    }];
 }
 
 - (void)refresh {
     if (![[PFUser currentUser].username isEqualToString:_lastUsername]) {
         _tasks = nil;
-        [_tableView reloadData];
+        _communities = nil;
+        
+        [self reloadUI];
     }
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self retrieveLocalTasks];
+        [self retrieveTasks];
     });
 }
 
@@ -224,25 +392,24 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         logIn.signUpController = signUp;
         
         [self presentViewController:logIn animated:NO completion:nil];
-    } else {
-        [self refresh];
     }
 }
 
 - (void)newTaskPressed:(id)sender {
-    if ([self hasBitcoinAddress]) {
-        if ([LocationSingleton sharedSingleton].geoPoint) {
-            UINavigationController* VC = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"NewTaskViewController"];
-            [self presentViewController:VC animated:YES completion:nil];
-        } else {
-            UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Couldn't Determine Location" message:@"We can't post a task without your location. Wait a few seconds and try again." preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-            [alertController addAction:cancelAction];
-            
-            [self presentViewController:alertController animated:YES completion:nil];
-        }
+    assert([PFUser currentUser] != nil);
+    
+    if ([LocationSingleton sharedSingleton].geoPoint) {
+        UINavigationController* navCon = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"NewTaskViewController"];
+        NewTaskViewController* VC = navCon.viewControllers[0];
+        VC.user = [PFUser currentUser];
+        VC.community = _communities[_selectedCommunity];
+        
+        assert(VC.user != nil);
+        assert(VC.community != nil);
+        
+        [self presentViewController:navCon animated:YES completion:nil];
     } else {
-        UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"No Bitcoin Address" message:@"You must add or create a Bitcoin address in My Stuff before posting a new task." preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Couldn't Determine Location" message:@"We can't post a task without your location. Wait a few seconds and try again." preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
         [alertController addAction:cancelAction];
         
@@ -259,23 +426,33 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         return nil;
     }
     
+    assert([annotation isKindOfClass:[LocationAnnotation class]]);
+    
     MKPinAnnotationView* view = (MKPinAnnotationView*)[mapView dequeueReusableAnnotationViewWithIdentifier:@"ID"];
     if (!view) {
         view = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"ID"];
     }
     
     view.canShowCallout = YES;
+    view.tintColor = [self colorForCommunity:((LocationAnnotation*)annotation).task[@"community"]];
     
     return view;
 }
 
 - (NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    if (_tasks.count) {
-        return [NSString stringWithFormat:@"%lu Tasks", (unsigned long)_tasks.count];
-    } else if (_tasks) {
-        return @"No Local Tasks - Make Your Own!";
+    if (!_communities.count) {
+        if (_communities) {
+            return @"Create or Join a Community to See Tasks";
+        } else {
+            return @"Loading...";
+        }
+    }
+    
+    NSArray* tasks = _tasks[[_communities[_selectedCommunity] objectId]];
+    if (tasks.count) {
+        return [NSString stringWithFormat:@"%lu Tasks", (unsigned long)tasks.count];
     } else {
-        return @"Loading...";
+        return @"No Tasks in This Community";
     }
 }
 
@@ -284,7 +461,9 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     
     ExamineTaskViewController* VC = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"ExamineTaskViewController"];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        VC.task = _tasks[indexPath.row];
+        PFObject* community = _communities[_selectedCommunity];
+        NSArray* tasks = _tasks[community.objectId];
+        VC.task = tasks[indexPath.row];
         
         dispatch_async(dispatch_get_main_queue(), ^{
             self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:self.navigationItem.backBarButtonItem.style target:nil action:nil];
@@ -303,15 +482,17 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:Identifier];
     }
     
-    if (_tasks.count) {
-        PFObject* task = _tasks[indexPath.row];
+    NSArray* tasks = [self tasksForCurrentCommunity];
+    
+    if (tasks.count) {
+        PFObject* task = tasks[indexPath.row];
         PFGeoPoint* geoPoint = task[@"postLocation"];
         CLLocation* location = [[CLLocation alloc] initWithLatitude:geoPoint.latitude longitude:geoPoint.longitude];
         
         cell.textLabel.text = task[@"title"];
         cell.detailTextLabel.text = [[LocationSingleton sharedSingleton] distanceTo:location];
         
-        if ([task[@"poster"] isEqualToString:[PFUser currentUser].username]) {
+        if ([((PFUser*)task[@"poster"]).objectId isEqualToString:[PFUser currentUser].objectId]) {
             cell.imageView.image = [UIImage imageNamed:@"Star"];
         } else {
             cell.imageView.image = nil;
@@ -322,13 +503,14 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         cell.textLabel.text = @"";
         cell.detailTextLabel.text = @"";
         cell.userInteractionEnabled = NO;
+        cell.imageView.image = nil;
     }
     
     return cell;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return _tasks.count ? _tasks.count : 1;
+    return [self tasksForCurrentCommunity].count ? [self tasksForCurrentCommunity].count : 1;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -338,7 +520,9 @@ static NSString* const LocalTasksParameterName = @"postLocation";
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    [self refresh];
+    if ([PFUser currentUser]) {
+        [self refresh];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {

@@ -14,8 +14,6 @@
 @interface HomeViewController : UIViewController <PFLogInViewControllerDelegate, PFSignUpViewControllerDelegate, UITableViewDataSource, UITableViewDelegate, MKMapViewDelegate, UICollectionViewDataSource, UICollectionViewDelegate> {
     __weak UIRefreshControl* _refreshControl;
     
-    NSArray<PFObject*>* _tasks;
-    
     NSString* _lastUsername;
 }
 

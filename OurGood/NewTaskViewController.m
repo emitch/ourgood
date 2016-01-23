@@ -12,6 +12,8 @@
 
 @interface NewTaskViewController ()
 
+@property (nonatomic, strong) PFGeoPoint* point;
+
 @end
 
 @implementation NewTaskViewController
@@ -74,93 +76,53 @@
 }
 
 - (IBAction)submitButtonPressed:(id)sender {
-    int contribution = [_contributionField.text intValue];
-    PFObject* payment = [PFObject objectWithClassName:@"Payment"];
-    payment[@"username"] = [PFUser currentUser].username;
-    payment[@"amount"] = @(contribution);
-    
-    PFObject* object = [PFObject objectWithClassName:@"Posting"];
-    object[@"title"] = _titleField.text;
-    object[@"committedPayments"] = @[payment];
-    object[@"claimPeriod"] = @([_claimPeriodField.text integerValue]);
-    object[@"poster"] = [PFUser currentUser].username;
-    object[@"postLocation"] = _point;
+    PFObject* task = [PFObject objectWithClassName:@"Task"];
+    task[@"title"] = _titleField.text;
+    task[@"poster"] = [PFUser currentUser];
+    task[@"claimPeriod"] = @([_claimPeriodField.text integerValue]);
+    task[@"postLocation"] = _point;
+    task[@"description"] = _descriptionView.text;
+    task[@"community"] = _community;
     if (_imageView.image) {
-        object[@"image"] = [PFFile fileWithData:UIImageJPEGRepresentation(_imageView.image, .3f)];
+        task[@"image"] = [PFFile fileWithData:UIImageJPEGRepresentation(_imageView.image, .3f)];
     }
-    object[@"description"] = _descriptionView.text;
+    
+    float contributionAmount = [_contributionField.text floatValue];
+    PFObject* contribution = [PFObject objectWithClassName:@"Contribution"];
+    contribution[@"contributor"] = [PFUser currentUser].username;
+    contribution[@"amount"] = @(contributionAmount);
+    contribution[@"task"] = task;
     
     UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Posting..." message:@"" preferredStyle:UIAlertControllerStyleAlert];
     [self presentViewController:alertController animated:YES completion:^{
         NSLog(@"saving new task");
-        [object saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
-            NSLog(@"perfoming BC transfer");
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            NSError* saveError = nil;
+            [task save:&saveError];
+            if (saveError) {
+                NSLog(@"ERROR SAVING TASK: %@", saveError.localizedDescription);
+                return;
+            }
+            [contribution save:&saveError];
+            if (saveError) {
+                NSLog(@"ERROR SAVING CONTRIBUTION: %@", saveError.localizedDescription);
+            }
             
-//            NSString* transferURLString = @"https://blockchain.info/merchant/$guid/payment?password=$main_password&to=$address&amount=$amount&from=$from&api_key=$api_key";
-//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$from" withString:[PFUser currentUser][@"address"]];
-//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$amount" withString:[NSString stringWithFormat:@"%i", (int)(contribution / [self BCtoUSD] * BC_TO_SATOSHI)]];
-//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$address" withString:APP_MONEY_BOX_ADDRESS];
-//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$main_password" withString:[PFUser currentUser][@"walletPassword"]];
-//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$guid" withString:[PFUser currentUser][@"guid"]];
-//            transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$api_key" withString:BLOCKCHAIN_API_KEY];
-//            
-//            NSLog(@"%@", transferURLString);
-//            
-//            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-//                NSString* transferResponse = [[NSString alloc] initWithContentsOfURL:[NSURL URLWithString:transferURLString] encoding:NSUTF8StringEncoding error:nil];
-//                NSDictionary* responseDictionary = [NSJSONSerialization JSONObjectWithData:[transferResponse dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:nil];
-//                if (responseDictionary[@"tx_hash"]) {
-                    //successful transfer to middle man
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSLog(@"updating user data");
-                        
-                        NSArray* posts = [PFUser currentUser][@"proposer"];
-                        if (!posts) {
-                            posts = [NSArray arrayWithObject:object.objectId];
-                        } else {
-                            posts = [posts arrayByAddingObject:object.objectId];
-                        }
-                        [PFUser currentUser][@"proposer"] = posts;
-                        
-                        NSArray* contributions = [PFUser currentUser][@"contributor"];
-                        if (!contributions) {
-                            contributions = [NSArray arrayWithObject:object.objectId];
-                        } else {
-                            contributions = [contributions arrayByAddingObject:object.objectId];
-                        }
-                        [PFUser currentUser][@"contributor"] = contributions;
-                        
-                        [[PFUser currentUser] saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
-                            [self dismissViewControllerAnimated:YES completion:^{
-                                UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Success!" message:@"Task posted; funds transferred." preferredStyle:UIAlertControllerStyleAlert];
-                                UIAlertAction* action = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                                    [self dismissViewControllerAnimated:YES completion:^{
-                                        [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
-                                    }];
-                                }];
-                                [success addAction:action];
-                                
-                                [self presentViewController:success animated:YES completion:nil];
-                            }];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self dismissViewControllerAnimated:YES completion:^{
+                    UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Success!" message:@"Task posted; funds transferred." preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertAction* action = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [self dismissViewControllerAnimated:YES completion:^{
+                            [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
                         }];
-                    });
-//                } else {
-//                    [object delete];
-//                    
-//                    dispatch_async(dispatch_get_main_queue(), ^{
-//                        [self dismissViewControllerAnimated:YES completion:^{
-//                            UIAlertController* error = [UIAlertController alertControllerWithTitle:@"Error Transferring Funds" message:transferResponse preferredStyle:UIAlertControllerStyleAlert];
-//                            UIAlertAction* action = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-//                            [error addAction:action];
-//                            
-//                            [self presentViewController:error animated:YES completion:nil];
-//                        }];
-//                    });
-//                }
-//            });
-        }];
+                    }];
+                    [success addAction:action];
+                    
+                    [self presentViewController:success animated:YES completion:nil];
+                }];
+            });
+        });
     }];
-    
 }
 
 - (IBAction)dismiss:(id)sender {

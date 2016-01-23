@@ -233,7 +233,7 @@
     
     _claimPeriodLabel.text = [NSString stringWithFormat:@"%i day claim period", [_task[@"claimPeriod"] intValue]];
     
-    if ([[PFUser currentUser].username isEqualToString:_task[@"poster"]]) {
+    if ([[PFUser currentUser].objectId isEqualToString:[_task[@"poster"] objectId]]) {
         _posterLabel.text = @"You posted this task";
     } else {
         _posterLabel.text = [NSString stringWithFormat:@"%@ posted this task", _task[@"poster"]];
