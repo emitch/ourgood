@@ -10,14 +10,20 @@
 
 #define COLLECTION_VIEW_SPACING 8.f
 
+#define CELL_SHADOW_VIEW_TAG 3
+#define CELL_IMAGE_VIEW_TAG 2
+#define CELL_LABEL_TAG 1
+
 @interface ExamineTaskViewController ()
+
+@property (nonatomic, strong) NSArray* contributors;
 
 @end
 
 @implementation ExamineTaskViewController
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
-    return CGSizeMake(50.f, 50.f);
+    return CGSizeMake(50.f, 75.f);
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
@@ -25,11 +31,11 @@
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
-    return COLLECTION_VIEW_SPACING;
+    return 0;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return 30;
+    return _contributors.count;
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
@@ -37,53 +43,142 @@
 }
 
 - (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
-    return UIEdgeInsetsMake(COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING, COLLECTION_VIEW_SPACING);
+    return UIEdgeInsetsMake(COLLECTION_VIEW_SPACING / 2, COLLECTION_VIEW_SPACING / 2, COLLECTION_VIEW_SPACING / 2, COLLECTION_VIEW_SPACING / 2);
 }
 
 - (UICollectionViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     static NSString* const Identifier = @"UserView";
     
     UICollectionViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:Identifier forIndexPath:indexPath];
-    
-    cell.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255) / (CGFloat)255 green:arc4random_uniform(255) / (CGFloat)255 blue:arc4random_uniform(255) / (CGFloat)255 alpha:1.f];
-    
-    cell.layer.cornerRadius = [self collectionView:collectionView layout:collectionView.collectionViewLayout sizeForItemAtIndexPath:indexPath].width / 2.f;
-    
     cell.layer.masksToBounds = NO;
-    cell.layer.shadowOffset = CGSizeZero;
-    cell.layer.shadowOpacity = 1.f;
-    cell.layer.shadowColor = [UIColor blackColor].CGColor;
-    cell.layer.shadowRadius = 1.f;
-    cell.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:cell.bounds byRoundingCorners:UIRectCornerAllCorners cornerRadii:CGSizeMake(25.f, 25.f)].CGPath;
+    
+    UILabel* nameLabel = [cell viewWithTag:CELL_LABEL_TAG];
+    UIImageView* profilePictureView = [cell viewWithTag:CELL_IMAGE_VIEW_TAG];
+    UIView* shadowView = [cell viewWithTag:CELL_SHADOW_VIEW_TAG];
+    
+    assert([nameLabel isKindOfClass:[UILabel class]]);
+    assert([profilePictureView isKindOfClass:[UIImageView class]]);
+    assert([shadowView isKindOfClass:[UIView class]]);
+    
+    //cell.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255) / (CGFloat)255 green:arc4random_uniform(255) / (CGFloat)255 blue:arc4random_uniform(255) / (CGFloat)255 alpha:1.f];
+    
+    profilePictureView.layer.cornerRadius = profilePictureView.frame.size.width / 2.f;
+    profilePictureView.layer.masksToBounds = YES;
+    
+    shadowView.layer.cornerRadius = profilePictureView.layer.cornerRadius;
+    shadowView.layer.masksToBounds = NO;
+    shadowView.layer.shadowOffset = CGSizeZero;
+    shadowView.layer.shadowOpacity = 1.f;
+    shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
+    shadowView.layer.shadowRadius = 1.f;
+    shadowView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:shadowView.bounds byRoundingCorners:UIRectCornerAllCorners cornerRadii:CGSizeMake(profilePictureView.frame.size.width / 2.f, profilePictureView.frame.size.width / 2.f)].CGPath;
+    
+    PFUser* contributor = _contributors[indexPath.row];
+    
+    nameLabel.text = contributor[@"username"];
+    if (contributor[@"image"]) {
+        profilePictureView.image = contributor[@"image"];
+    } else {
+        profilePictureView.image = [UIImage imageNamed:@"default_user_image.png"];
+    }
     
     return cell;
+}
+
+- (void)updateUI {
+    _titleLabel.text = _task[@"title"];
+    _descriptionTextView.text = @"Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.";
+    
+    if (_task[@"claimant"]) {
+        _claimPeriodLabel.text = [NSString stringWithFormat:@"Claimed by %@", _task[@"claimant"]];
+        
+        _helpButton.enabled = NO;
+        [_helpButton setTitle:@"Task Claimed" forState:UIControlStateNormal];
+    } else {
+        _claimPeriodLabel.text = [NSString stringWithFormat:@"%i day claim period", [_task[@"claimPeriod"] intValue]];
+    }
+    
+    if ([[PFUser currentUser].objectId isEqualToString:[_task[@"poster"] objectId]]) {
+        _posterLabel.text = @"You posted this task";
+    } else {
+        _posterLabel.text = [NSString stringWithFormat:@"%@ posted this task", _task[@"poster"]];
+    }
+    
+    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+    formatter.dateStyle = NSDateFormatterMediumStyle;
+    formatter.doesRelativeDateFormatting = YES;
+    
+    _creationDateLabel.text = [NSString stringWithFormat:@"Posted %@", [formatter stringFromDate:_task.createdAt]];
+    
+    if ([_contributions count] == 1) {
+        _contributionTitleLabel.text = @"Contribution";
+    }
+    
+    if (_contributions) {
+        _valueLabel.text = [NSString stringWithFormat:@"$%.02f", _totalValue];
+        _yourContributionLabel.text = [NSString stringWithFormat:@"$%.02f", _myContribution];
+        
+        _contributionsLabel.text = [NSString stringWithFormat:@"%lu", [_contributions count]];
+    }
+    
+    [_collectionView reloadData];
 }
 
 - (BOOL)hasBitcoinAddress {
     return [[PFUser currentUser][@"address"] length];
 }
 
-- (void)updateValue {
-    for (PFObject* payment in _task[@"committedPayments"]) {
-        if ([payment respondsToSelector:@selector(fetchIfNeeded)])
-            [payment fetchIfNeeded];
+- (void)contributionsRetrieved:(NSArray * _Nullable)objects withError:(NSError * _Nullable)error {
+    if (error) {
+        NSLog(@"ERROR ACQUIRING CONTRIBUTIONS: %@", error.localizedDescription);
+        return;
+    }
+    
+    _totalValue = 0;
+    _myContribution = 0;
+    _contributions = objects;
+    
+    NSMutableArray* contributors = [[NSMutableArray alloc] init];
+    
+    for (PFObject* contribution in objects) {
+        float amount = [contribution[@"amount"] floatValue];
+        _totalValue += amount;
         
-        _totalValue += [payment[@"amount"] integerValue];
-        
-        if ([payment[@"username"] isEqualToString:[PFUser currentUser].username]) {
+        if ([[contribution[@"contributor"] objectId] isEqualToString:[PFUser currentUser].objectId]) {
             _hasContributed = YES;
-            _myContribution += [payment[@"amount"] intValue];
+            _myContribution += amount;
         }
+        
+        if (![contributors containsObject:contribution[@"contributor"]]) {
+            [contributors addObject:contribution[@"contributor"]];
+        }
+    }
+    
+    _contributors = contributors;
+    
+    [self updateUI];
+}
+
+- (void)updateContributions:(BOOL)async {
+    PFQuery* query = [PFQuery queryWithClassName:@"Contribution"];
+    [query whereKey:@"task" equalTo:_task];
+    [query includeKey:@"contributor"];
+    
+    if (async) {
+        [query findObjectsInBackgroundWithBlock:^(NSArray * _Nullable objects, NSError * _Nullable error) {
+            [self contributionsRetrieved:objects withError:error];
+        }];
+    } else {
+        NSError* error = nil;
+        NSArray* objects = [query findObjects:&error];
+        [self contributionsRetrieved:objects withError:error];
     }
 }
 
 - (void)setTask:(PFObject *)task {
     _task = task;
     
-    _contributions = task[@"committedPayments"];
-    _myContribution = 0;
-    
-    [self updateValue];
+    [self updateContributions:YES];
 }
 
 - (IBAction)helpButtonPressed:(id)sender {
@@ -97,9 +192,7 @@
         [self contributePressed:nil];
     }]];
     
-    [controller addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-        
-    }]];
+    [controller addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     
     [self presentViewController:controller animated:YES completion:nil];
 }
@@ -114,24 +207,17 @@
     [alertController addAction:[UIAlertAction actionWithTitle:@"Claim" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         _task[@"claimDate"] = [NSDate date];
         _task[@"claimed"] = @YES;
-        _task[@"claimee"] = [PFUser currentUser].username;
+        _task[@"claimant"] = [PFUser currentUser].username;
         
-        NSLog(@"updating task");
         [_task saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
-            NSLog(@"updating user info");
+            [self dismissViewControllerAnimated:YES completion:nil];
             
-            NSArray* claimee = [PFUser currentUser][@"claimee"];
-            if (!claimee) {
-                claimee = [NSArray arrayWithObject:_task.objectId];
-            } else {
-                claimee = [claimee arrayByAddingObject:_task.objectId];
+            if (error) {
+                NSLog(@"ERROR SAVING TASK UPON CLAIMING: %@", error);
+                return;
             }
-            [PFUser currentUser][@"claimee"] = claimee;
             
-            [[PFUser currentUser] saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
-                _claimPeriodLabel.text = [NSString stringWithFormat:@"Claimed by %@", _task[@"claimee"]];
-                [self dismissViewControllerAnimated:YES completion:nil];
-            }];
+            [self updateUI];
         }];
     }]];
     
@@ -151,77 +237,52 @@
 }
 
 - (IBAction)contributePressed:(id)sender {
-//    if ([self hasBitcoinAddress]) {
-        UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"How much would you like to contribute?" message:@"" preferredStyle:UIAlertControllerStyleAlert];
-        [alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-            textField.keyboardType = UIKeyboardTypeNumberPad;
-            [textField addTarget:self action:@selector(textFieldChanged:) forControlEvents:UIControlEventEditingChanged];
-            textField.placeholder = @"Enter a dollar amount";
-        }];
+    UIAlertController* contributionAmountAlert = [UIAlertController alertControllerWithTitle:@"How much would you like to contribute?" message:@"" preferredStyle:UIAlertControllerStyleAlert];
+    [contributionAmountAlert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        textField.keyboardType = UIKeyboardTypeNumberPad;
+        [textField addTarget:self action:@selector(textFieldChanged:) forControlEvents:UIControlEventEditingChanged];
+        textField.placeholder = @"Enter a dollar amount";
+    }];
+    
+    UIAlertAction* action = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }];
+    [contributionAmountAlert addAction:action];
+    
+    UIAlertAction* contributeAction = [UIAlertAction actionWithTitle:@"Contribute" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        float amount = [contributionAmountAlert.textFields[0].text floatValue];
         
-        UIAlertAction* action = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-            [self dismissViewControllerAnimated:YES completion:nil];
-        }];
-        [alertController addAction:action];
+        PFObject* newContribution = [PFObject objectWithClassName:@"Contribution"];
+        newContribution[@"contributor"] = [PFUser currentUser];
+        newContribution[@"task"] = _task;
+        newContribution[@"amount"] = @(amount);
         
-        UIAlertAction* contribute = [UIAlertAction actionWithTitle:@"Contribute" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-            PFObject* newPayment = [PFObject objectWithClassName:@"Payment"];
-            newPayment[@"username"] = [PFUser currentUser].username;
-            newPayment[@"amount"] = @([alertController.textFields[0].text intValue]);
-            NSArray* payments = [_task[@"committedPayments"] arrayByAddingObject:newPayment];
-            _task[@"committedPayments"] = payments;
-            
-            UIAlertController* saving = [UIAlertController alertControllerWithTitle:@"Sending Your Contribution..." message:@"Please wait" preferredStyle:UIAlertControllerStyleAlert];
-            [self presentViewController:saving animated:YES completion:^{
-                NSLog(@"saving contribution");
-                [_task saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
-                    NSLog(@"saving user data");
-                    
-                    NSArray* contributions = [PFUser currentUser][@"contributor"];
-                    if (!contributions) {
-                        contributions = [NSArray arrayWithObject:_task.objectId];
-                    } else {
-                        contributions = [contributions arrayByAddingObject:_task.objectId];
-                    }
-                    [PFUser currentUser][@"contributor"] = contributions;
-                    
-                    [[PFUser currentUser] saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
+        UIAlertController* saving = [UIAlertController alertControllerWithTitle:@"Sending Your Contribution..." message:@"Please wait" preferredStyle:UIAlertControllerStyleAlert];
+        [self presentViewController:saving animated:YES completion:^{
+            [newContribution saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                    [self updateContributions:NO];
+                    dispatch_async(dispatch_get_main_queue(), ^{
                         [saving setTitle:@"Contribution Sent!"];
                         [saving setMessage:nil];
                         
-                        _myContribution += [newPayment[@"amount"] intValue];
-                        _yourContributionLabel.text = [NSString stringWithFormat:@"$%ld", (long)_myContribution];
+                        _myContribution += amount;
+                        _totalValue += amount;
                         
-                        _totalValue += [newPayment[@"amount"] intValue];
-                        _valueLabel.text = [NSString stringWithFormat:@"$%ld", (long)_totalValue];
+                        [self updateUI];
                         
-                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                            [self dismissViewControllerAnimated:YES completion:nil];
-                        });
-                    }];
-                    
-                }];
+                        [self dismissViewControllerAnimated:YES completion:nil];
+                    });
+                });
+                
             }];
         }];
-        
-        _contributeAction = contribute;
-        contribute.enabled = NO;
-        [alertController addAction:contribute];
-        [self presentViewController:alertController animated:YES completion:nil];
-//    } else {
-//        UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"No Bitcoin Address" message:@"You must add or create a Bitcoin address in My Stuff before posting a new task." preferredStyle:UIAlertControllerStyleAlert];
-//        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-//        [alertController addAction:cancelAction];
-//        
-//        [self presentViewController:alertController animated:YES completion:nil];
-//    }
-}
-
-- (void)claimTask_UI {
-    _claimPeriodLabel.text = [NSString stringWithFormat:@"Claimed by %@", _task[@"claimee"]];
+    }];
     
-    _helpButton.enabled = NO;
-    [_helpButton setTitle:@"Task Claimed" forState:UIControlStateNormal];
+    _contributeAction = contributeAction;
+    contributeAction.enabled = NO;
+    [contributionAmountAlert addAction:contributeAction];
+    [self presentViewController:contributionAmountAlert animated:YES completion:nil];
 }
 
 - (void)viewDidLoad {
@@ -229,25 +290,7 @@
     
     self.navigationItem.title = @"Task Info";
     
-    _titleLabel.text = _task[@"title"];
-    
-    _claimPeriodLabel.text = [NSString stringWithFormat:@"%i day claim period", [_task[@"claimPeriod"] intValue]];
-    
-    if ([[PFUser currentUser].objectId isEqualToString:[_task[@"poster"] objectId]]) {
-        _posterLabel.text = @"You posted this task";
-    } else {
-        _posterLabel.text = [NSString stringWithFormat:@"%@ posted this task", _task[@"poster"]];
-    }
-    
-    _contributionsLabel.text = [NSString stringWithFormat:@"%lu", [_contributions count]];
-    
-    if ([_contributions count] == 1) {
-        _contributionTitleLabel.text = @"Contribution";
-    }
-    
-    _valueLabel.text = [NSString stringWithFormat:@"$%lu", _totalValue];
-    
-    _yourContributionLabel.text = [NSString stringWithFormat:@"$%lu", _myContribution];
+    [self updateUI];
     
     _helpButton.titleLabel.adjustsFontSizeToFitWidth = YES;
     _helpButton.titleLabel.minimumScaleFactor = .2f;
@@ -256,9 +299,6 @@
     // Filler image
     _imageView.image = [UIImage imageNamed:@"Pothole.jpg"];
     _imageView.layer.cornerRadius = 2.f;
-    
-    // _descriptionTextView.text = _task[@"description"];
-    _descriptionTextView.text = @"Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.";
     
     __weak id weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -290,10 +330,6 @@
     _collectionContainer.layer.shadowOpacity = .5f;
     _collectionContainer.layer.shadowOffset = CGSizeZero;
     _collectionContainer.layer.shadowRadius = 1.f;
-    
-    if ([_task[@"claimed"] boolValue]) {
-        [self claimTask_UI];
-    }
 }
 
 - (void)didReceiveMemoryWarning {

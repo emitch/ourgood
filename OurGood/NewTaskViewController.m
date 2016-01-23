@@ -42,6 +42,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.navigationItem.prompt = [NSString stringWithFormat:@"Community: '%@'", _community[@"name"]];
+    
     _point = [LocationSingleton sharedSingleton].geoPoint;
     
     UIView* contributionsPadding = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, _titleField.frame.size.height)];
@@ -89,7 +91,7 @@
     
     float contributionAmount = [_contributionField.text floatValue];
     PFObject* contribution = [PFObject objectWithClassName:@"Contribution"];
-    contribution[@"contributor"] = [PFUser currentUser].username;
+    contribution[@"contributor"] = [PFUser currentUser];
     contribution[@"amount"] = @(contributionAmount);
     contribution[@"task"] = task;
     

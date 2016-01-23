@@ -31,6 +31,7 @@
 
 #define COLLECTION_VIEW_SPACING 8.f
 
+#define CELL_VIEW_TAG           4
 #define CELL_TITLE_LABEL_TAG    1
 #define CELL_BUTTON_TAG         3
 
@@ -85,14 +86,21 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     UICollectionViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:Identifier forIndexPath:indexPath];
     
     UILabel* titleLabel = [cell viewWithTag:CELL_TITLE_LABEL_TAG];
+    UIView* backgroundView = [cell viewWithTag:CELL_VIEW_TAG];
+    
     assert([titleLabel isKindOfClass:[UILabel class]]);
+    assert([backgroundView isKindOfClass:[UIView class]]);
     
     cell.layer.masksToBounds = NO;
     cell.layer.shadowColor = [UIColor blackColor].CGColor;
-    cell.layer.shadowOpacity = .5f;
+    cell.layer.shadowOpacity = .65f;
     cell.layer.shadowOffset = CGSizeZero;
     cell.layer.shadowRadius = 1.f;
-    cell.layer.cornerRadius = 2.f;
+    cell.layer.cornerRadius = 1.f;
+    
+    backgroundView.layer.cornerRadius = cell.layer.cornerRadius;
+    backgroundView.backgroundColor = [UIColor colorWithWhite:.95 alpha:1.f];
+    titleLabel.textColor = [UIColor blackColor];
     
     if (indexPath.row < [_communities count]) {
         if (indexPath.row == _selectedCommunity) {
@@ -103,11 +111,10 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         
         titleLabel.text = _communities[indexPath.row][@"name"];
     } else {
-        titleLabel.text = @"Create Community...";
+        titleLabel.text = @"Add Community";
         
-        cell.layer.shadowColor = [UIColor greenColor].CGColor;
-        cell.layer.shadowRadius = 2.f;
-        cell.layer.shadowOpacity = 1.f;
+        backgroundView.backgroundColor = [UIColor colorWithWhite:.0f alpha:1.f];
+        titleLabel.textColor = [UIColor colorWithWhite:.95f alpha:1.f];
     }
     
     
@@ -231,6 +238,8 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         [_collectionView reloadData];
         [_tableView reloadData];
         
+        self.navigationItem.rightBarButtonItem.enabled = NO;
+        
         return;
     }
     
@@ -238,11 +247,13 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     
     _selectedCommunity = selectedCommunity;
     
+    self.navigationItem.rightBarButtonItem.enabled = YES;
+    
     NSIndexPath* indexPath = [NSIndexPath indexPathForItem:selectedCommunity inSection:0];
     
     UICollectionViewCell* cell = [_collectionView cellForItemAtIndexPath:indexPath];
     
-    self.navigationItem.title = [NSString stringWithFormat:@"Tasks in '%@'", _communities[_selectedCommunity][@"name"]];
+    self.navigationItem.title = [NSString stringWithFormat:@"%@", _communities[_selectedCommunity][@"name"]];
     
     [_collectionView reloadData];
     [_tableView reloadData];
@@ -264,6 +275,20 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     [self updateSelectedCommunity:_selectedCommunity];
     
     [self updateMap];
+    
+    if (_communities) {
+        [_indicator stopAnimating];
+        
+        [_refreshControl endRefreshing];
+        
+        if (!_refreshControl) {
+        UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+        [refreshControl addTarget:self action:@selector(refreshControlUsed:) forControlEvents:UIControlEventValueChanged];
+        [_tableView addSubview:refreshControl];
+        [_tableView sendSubviewToBack:refreshControl];
+        _refreshControl = refreshControl;
+        }
+    }
 }
 
 - (void)updateMap {
@@ -320,13 +345,10 @@ static NSString* const LocalTasksParameterName = @"postLocation";
                     _downloadedTasks = nil;
                     _downloadedCommunities = nil;
                     
-                    
                     [self reloadUI];
                 }
             }];
         }
-        
-        NSLog(@"%@", _downloadedCommunities);
         
         if (![_downloadedCommunities count]) {
             _communities = _downloadedCommunities;
@@ -341,7 +363,13 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         _tasks = nil;
         _communities = nil;
         
+        self.navigationItem.title = @"Loading...";
+        
         [self reloadUI];
+    }
+    
+    if (!_communities) {
+        [_indicator startAnimating];
     }
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -356,9 +384,10 @@ static NSString* const LocalTasksParameterName = @"postLocation";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self updateSelectedCommunity:0];
+    self.navigationItem.rightBarButtonItem.enabled = NO;
     
-    self.navigationItem.title = @"Loading...";
+    _selectedCommunity = 0;
+    [self reloadUI];
     
     _tableView.layer.masksToBounds = NO;
     _tableView.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -377,11 +406,6 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     _collectionView.decelerationRate = .1f;
     
     self.automaticallyAdjustsScrollViewInsets = NO;
-    
-    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-    [refreshControl addTarget:self action:@selector(refreshControlUsed:) forControlEvents:UIControlEventValueChanged];
-    [_tableView addSubview:refreshControl];
-    _refreshControl = refreshControl;
     
     if (![PFUser currentUser]) {
         PFLogInViewController* logIn = [[PFLogInViewController alloc] init];
@@ -517,18 +541,18 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     return 1;
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
+    _lastUsername = [[PFUser currentUser].username copy];
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
     if ([PFUser currentUser]) {
         [self refresh];
     }
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
-    
-    _lastUsername = [[PFUser currentUser].username copy];
 }
 
 - (void)signUpViewController:(PFSignUpViewController *)signUpController didSignUpUser:(PFUser *)user {

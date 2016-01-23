@@ -14,8 +14,8 @@
     
     __weak UIAlertAction* _contributeAction;
     
-    long _totalValue;
-    long _myContribution;
+    float _totalValue;
+    float _myContribution;
     
     BOOL _hasContributed;
 }
@@ -35,7 +35,7 @@
 
 @property (nonatomic, weak) IBOutlet UICollectionView* collectionView;
 
-
+@property (nonatomic, weak) IBOutlet UILabel* creationDateLabel;
 @property (nonatomic, weak) IBOutlet UILabel* claimPeriodLabel;
 @property (nonatomic, weak) IBOutlet UILabel* yourContributionLabel;
 @property (nonatomic, weak) IBOutlet UILabel* contributionTitleLabel;
