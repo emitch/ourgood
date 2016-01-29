@@ -14,6 +14,8 @@
 #import "ExamineTaskViewController.h"
 #import "AppDelegate.h"
 #import "PagingCollectionViewLayout.h"
+#import "ZSAnnotation.h"
+#import "ZSPinAnnotation.h"
 
 @interface HomeViewController ()
 
@@ -41,7 +43,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
 - (UIColor*)colorForCommunity:(PFObject*)community {
     assert(community != nil);
     
-    static const NSInteger NumColors = 20;
+    static const NSInteger NumColors = 10;
     static const CGFloat WheelSize = 360.f;
     static NSMutableArray* colors = nil;
     
@@ -49,14 +51,21 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         colors = [[NSMutableArray alloc] init];
         
         for (int idx = 0; idx < WheelSize; idx += WheelSize / NumColors) {
-            UIColor* color = [UIColor colorWithHue:idx / WheelSize saturation:1.f brightness:1.f alpha:1.f];
+            UIColor* color = [UIColor colorWithHue:(float)idx / WheelSize saturation:1.f brightness:1.f alpha:1.f];
+            
             [colors addObject:color];
         }
     }
     
-    NSInteger index = [_communities indexOfObject:community];
+    NSUInteger index = [_communities indexOfObjectPassingTest:^BOOL(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        assert([obj isKindOfClass:[PFObject class]]);
+        
+        PFObject* c = obj;
+        
+        return *stop = [[c objectId] isEqualToString:[community objectId]];
+    }];
     
-    assert(index >= 0);
+    assert(index != NSNotFound);
     
     return colors[index % NumColors];
 }
@@ -93,7 +102,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     
     cell.layer.masksToBounds = NO;
     cell.layer.shadowColor = [UIColor blackColor].CGColor;
-    cell.layer.shadowOpacity = .65f;
+    cell.layer.shadowOpacity = .55f;
     cell.layer.shadowOffset = CGSizeZero;
     cell.layer.shadowRadius = 1.f;
     cell.layer.cornerRadius = 1.f;
@@ -104,8 +113,8 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     
     if (indexPath.row < [_communities count]) {
         if (indexPath.row == _selectedCommunity) {
-            cell.layer.shadowColor = [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0].CGColor;
-            cell.layer.shadowRadius = 2.f;
+            cell.layer.shadowColor = [self colorForCommunity:_communities[_selectedCommunity]].CGColor;
+            cell.layer.shadowRadius = 3.f;
             cell.layer.shadowOpacity = 1.f;
         }
         
@@ -116,7 +125,6 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         backgroundView.backgroundColor = [UIColor colorWithWhite:.0f alpha:1.f];
         titleLabel.textColor = [UIColor colorWithWhite:.95f alpha:1.f];
     }
-    
     
     return cell;
 }
@@ -258,6 +266,8 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     [_collectionView reloadData];
     [_tableView reloadData];
     
+    [self updateMap];
+    
     if (CGRectContainsRect(self.view.frame, [self.view convertRect:cell.frame fromCoordinateSpace:cell.superview])) {
         return;
     }
@@ -282,16 +292,30 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         [_refreshControl endRefreshing];
         
         if (!_refreshControl) {
-        UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-        [refreshControl addTarget:self action:@selector(refreshControlUsed:) forControlEvents:UIControlEventValueChanged];
-        [_tableView addSubview:refreshControl];
-        [_tableView sendSubviewToBack:refreshControl];
-        _refreshControl = refreshControl;
+            UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+            [refreshControl addTarget:self action:@selector(refreshControlUsed:) forControlEvents:UIControlEventValueChanged];
+            [_tableView addSubview:refreshControl];
+            [_tableView sendSubviewToBack:refreshControl];
+            _refreshControl = refreshControl;
         }
     }
 }
 
 - (void)updateMap {
+    NSMutableArray* toShow = [[NSMutableArray alloc] init];
+    
+    for (ZSAnnotation* ann in _mapView.annotations) {
+        if ([ann isKindOfClass:[ZSAnnotation class]]) {
+            if ([_tasks[[_communities[_selectedCommunity] objectId]] containsObject:ann.task]) {
+                [toShow addObject:ann];
+            }
+        }
+    }
+    
+    [_mapView showAnnotations:toShow animated:YES];
+}
+
+- (void)refreshAnnotations {
     [_mapView removeAnnotations:_mapView.annotations];
     
     NSMutableArray* allTasks = [[NSMutableArray alloc] init];
@@ -301,8 +325,16 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     }
     
     for (PFObject* object in allTasks) {
-        LocationAnnotation* ann = [[LocationAnnotation alloc] init];
+        ZSAnnotation* ann = [[ZSAnnotation alloc] init];
         ann.task = object;
+        ann.title = object[@"title"];
+        
+        NSUInteger MaxLength = 50;
+        NSString* description = object[@"description"];
+        if (description.length > MaxLength) {
+            description = [[description substringToIndex:MaxLength - 3] stringByAppendingString:@"..."];
+        }
+        ann.subtitle = description;
         
         PFGeoPoint* point = object[@"postLocation"];
         ann.coordinate = CLLocationCoordinate2DMake(point.latitude, point.longitude);
@@ -310,7 +342,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         [_mapView addAnnotation:ann];
     }
     
-    [_mapView showAnnotations:_mapView.annotations animated:YES];
+    [self updateMap];
 }
 
 - (void)retrieveTasks {
@@ -344,6 +376,8 @@ static NSString* const LocalTasksParameterName = @"postLocation";
                     
                     _downloadedTasks = nil;
                     _downloadedCommunities = nil;
+                    
+                    [self refreshAnnotations];
                     
                     [self reloadUI];
                 }
@@ -450,15 +484,16 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         return nil;
     }
     
-    assert([annotation isKindOfClass:[LocationAnnotation class]]);
+    assert([annotation isKindOfClass:[ZSAnnotation class]]);
     
-    MKPinAnnotationView* view = (MKPinAnnotationView*)[mapView dequeueReusableAnnotationViewWithIdentifier:@"ID"];
+    ZSPinAnnotation* view = (ZSPinAnnotation*)[mapView dequeueReusableAnnotationViewWithIdentifier:@"ID"];
     if (!view) {
-        view = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"ID"];
+        view = [[ZSPinAnnotation alloc] initWithAnnotation:annotation reuseIdentifier:@"ID"];
     }
     
+    view.annotationType = ZSPinAnnotationTypeTagStroke;
+    view.annotationColor = [self colorForCommunity:((ZSAnnotation*)annotation).task[@"community"]];
     view.canShowCallout = YES;
-    view.tintColor = [self colorForCommunity:((LocationAnnotation*)annotation).task[@"community"]];
     
     return view;
 }
@@ -517,7 +552,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         cell.detailTextLabel.text = [[LocationSingleton sharedSingleton] distanceTo:location];
         
         if ([((PFUser*)task[@"poster"]).objectId isEqualToString:[PFUser currentUser].objectId]) {
-            cell.imageView.image = [UIImage imageNamed:@"Star"];
+            //cell.imageView.image = [UIImage imageNamed:@"Star"];
         } else {
             cell.imageView.image = nil;
         }
