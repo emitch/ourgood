@@ -10,8 +10,9 @@
 #import <Parse/Parse.h>
 #import <ParseUI/ParseUI.h>
 #import <MapKit/MapKit.h>
+#import "JoinCommunityViewController.h"
 
-@interface HomeViewController : UIViewController <PFLogInViewControllerDelegate, PFSignUpViewControllerDelegate, UITableViewDataSource, UITableViewDelegate, MKMapViewDelegate, UICollectionViewDataSource, UICollectionViewDelegate> {
+@interface HomeViewController : UIViewController <PFLogInViewControllerDelegate, PFSignUpViewControllerDelegate, UITableViewDataSource, UITableViewDelegate, MKMapViewDelegate, UICollectionViewDataSource, UICollectionViewDelegate, JoinCommunityViewControllerDelegate> {
     __weak UIRefreshControl* _refreshControl;
     
     NSString* _lastUsername;

@@ -165,6 +165,109 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     alert.actions[1].enabled = sender.text.length != 0;
 }
 
+- (void)createCommunity {
+    UIAlertController* newCommunityAlert = [UIAlertController alertControllerWithTitle:@"New Community" message:nil preferredStyle:UIAlertControllerStyleAlert];
+    [newCommunityAlert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        textField.placeholder = @"New Community Name";
+        [textField addTarget:self action:@selector(textFieldChanged:) forControlEvents:UIControlEventEditingChanged];
+    }];
+    
+    [newCommunityAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    
+    UIAlertAction* addAction = [UIAlertAction actionWithTitle:@"Create" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        PFObject* newCommunity = [PFObject objectWithClassName:@"Community"];
+        newCommunity[@"creator"] = [PFUser currentUser];
+        newCommunity[@"name"] = newCommunityAlert.textFields[0].text;
+        
+        UIAlertController* saving = [UIAlertController alertControllerWithTitle:@"Creating New Community..." message:nil preferredStyle:UIAlertControllerStyleAlert];
+        [self presentViewController:saving animated:YES completion:nil];
+        
+        [newCommunity saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+            if (error) {
+                NSLog(@"ERROR SAVING NEW COMMUNITY: %@", error.localizedDescription);
+                UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Error Creating Community" message:error.localizedFailureReason preferredStyle:UIAlertControllerStyleAlert];
+                [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+                
+                return;
+            }
+            
+            [[[PFUser currentUser] relationForKey:@"communities"] addObject:newCommunity];
+            [[PFUser currentUser] saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
+                if (error) {
+                    NSLog(@"ERROR SAVING NEW COMMUNITY: %@", error.localizedDescription);
+                    UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Error Creating Community" message:error.localizedFailureReason preferredStyle:UIAlertControllerStyleAlert];
+                    [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+                    
+                    return;
+                }
+                
+                [self setCommunities:[_communities arrayByAddingObject:newCommunity]];
+                
+                NSMutableDictionary* newTasks = [NSMutableDictionary dictionaryWithDictionary:_tasks];
+                newTasks[newCommunity.objectId] = @[];
+                _tasks = newTasks;
+                
+                [self updateSelectedCommunity:[_communities indexOfObject:newCommunity]];
+                
+                UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Community Created!" message:nil preferredStyle:UIAlertControllerStyleAlert];
+                [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+            }];
+        }];
+    }];
+    
+    addAction.enabled = NO;
+    
+    [newCommunityAlert addAction:addAction];
+    
+    [self presentViewController:newCommunityAlert animated:YES completion:nil];
+}
+
+- (void)joinCommunityViewController:(JoinCommunityViewController *)viewController didSelectCommunity:(PFObject *)community {
+    [[[PFUser currentUser] relationForKey:@"communities"] addObject:community];
+    
+    PFQuery* taskQuery = [PFQuery queryWithClassName:@"Task"];
+    [taskQuery whereKey:@"community" equalTo:community];
+    [taskQuery findObjectsInBackgroundWithBlock:^(NSArray * _Nullable tasks, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"ERROR RETRIEVING COMMUNITY %@'S TASKS: %@", community[@"name"], error.localizedDescription);
+            return;
+        }
+        
+        [[PFUser currentUser] saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
+            if (error) {
+                NSLog(@"ERROR JOINING COMMUNITY: %@", error.localizedDescription);
+                UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Error Joining Community" message:error.localizedFailureReason preferredStyle:UIAlertControllerStyleAlert];
+                [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+                
+                return;
+            }
+            
+            
+            [self setCommunities:[_communities arrayByAddingObject:community]];
+            
+            NSMutableDictionary* newTasks = [NSMutableDictionary dictionaryWithDictionary:_tasks];
+            newTasks[community.objectId] = tasks;
+            _tasks = newTasks;
+            
+            [self updateSelectedCommunity:[_communities indexOfObject:community]];
+            
+            UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Community Created!" message:nil preferredStyle:UIAlertControllerStyleAlert];
+            [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+        }];
+    }];
+    
+    
+}
+
+- (void)joinCommunity {
+    JoinCommunityViewController* VC = [[JoinCommunityViewController alloc] initWithStyle:UITableViewStylePlain];
+    VC.delegate = self;
+    UINavigationController* navCon = [[UINavigationController alloc] initWithRootViewController:VC];
+    
+    [self presentViewController:navCon animated:YES completion:nil];
+}
+
 - (IBAction)cellTapped:(UIButton*)sender {
     UICollectionViewCell* cell = (UICollectionViewCell*)sender.superview;
     while (![cell isKindOfClass:[UICollectionViewCell class]]) {
@@ -179,61 +282,21 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     if (index < [_communities count]) {
         [self updateSelectedCommunity:index];
     } else {
-        UIAlertController* newCommunityAlert = [UIAlertController alertControllerWithTitle:@"New Community" message:nil preferredStyle:UIAlertControllerStyleAlert];
-        [newCommunityAlert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-            textField.placeholder = @"New Community Name";
-            [textField addTarget:self action:@selector(textFieldChanged:) forControlEvents:UIControlEventEditingChanged];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Create Community or Join Existing Community?" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+        UIAlertAction* create = [UIAlertAction actionWithTitle:@"Create Community" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self createCommunity];
         }];
+        [alert addAction:create];
         
-        [newCommunityAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
-        
-        UIAlertAction* addAction = [UIAlertAction actionWithTitle:@"Create" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            PFObject* newCommunity = [PFObject objectWithClassName:@"Community"];
-            newCommunity[@"creator"] = [PFUser currentUser];
-            newCommunity[@"name"] = newCommunityAlert.textFields[0].text;
-            
-            UIAlertController* saving = [UIAlertController alertControllerWithTitle:@"Creating New Community..." message:nil preferredStyle:UIAlertControllerStyleAlert];
-            [self presentViewController:saving animated:YES completion:nil];
-            
-            [newCommunity saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
-                [self dismissViewControllerAnimated:YES completion:nil];
-                if (error) {
-                    NSLog(@"ERROR SAVING NEW COMMUNITY: %@", error.localizedDescription);
-                    UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Error Creating Community" message:error.localizedFailureReason preferredStyle:UIAlertControllerStyleAlert];
-                    [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
-                    
-                    return;
-                }
-                
-                [[[PFUser currentUser] relationForKey:@"communities"] addObject:newCommunity];
-                [[PFUser currentUser] saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
-                    if (error) {
-                        NSLog(@"ERROR SAVING NEW COMMUNITY: %@", error.localizedDescription);
-                        UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Error Creating Community" message:error.localizedFailureReason preferredStyle:UIAlertControllerStyleAlert];
-                        [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
-                        
-                        return;
-                    }
-                    
-                    _communities = [_communities arrayByAddingObject:newCommunity];
-                    
-                    NSMutableDictionary* newTasks = [NSMutableDictionary dictionaryWithDictionary:_tasks];
-                    newTasks[newCommunity.objectId] = @[];
-                    _tasks = newTasks;
-                    
-                    [self updateSelectedCommunity:[_communities count] - 1];
-                    
-                    UIAlertController* success = [UIAlertController alertControllerWithTitle:@"Community Created!" message:nil preferredStyle:UIAlertControllerStyleAlert];
-                    [success addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
-                }];
-            }];
+        UIAlertAction* join = [UIAlertAction actionWithTitle:@"Join Community" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self joinCommunity];
         }];
+        [alert addAction:join];
         
-        addAction.enabled = NO;
+        UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
+        [alert addAction:cancel];
         
-        [newCommunityAlert addAction:addAction];
-        
-        [self presentViewController:newCommunityAlert animated:YES completion:nil];
+        [self presentViewController:alert animated:YES completion:nil];
     }
 }
 
@@ -345,6 +408,15 @@ static NSString* const LocalTasksParameterName = @"postLocation";
     [self updateMap];
 }
 
+- (void)setCommunities:(NSArray *)communities {
+    _communities = [communities sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+        assert([obj1 isKindOfClass:[PFObject class]]);
+        assert([obj2 isKindOfClass:[PFObject class]]);
+        
+        return [obj1[@"name"] compare:obj2[@"name"]];
+    }];
+}
+
 - (void)retrieveTasks {
     PFRelation* communitiesRelation = [[PFUser currentUser] relationForKey:@"communities"];
     PFQuery* communitiesQuery = [communitiesRelation query];
@@ -371,7 +443,7 @@ static NSString* const LocalTasksParameterName = @"postLocation";
                 _downloadedTasks[community.objectId] = tasks;
                 
                 if ([[_downloadedTasks allKeys] count] == [_downloadedCommunities count]) {
-                    _communities = _downloadedCommunities;
+                    [self setCommunities:_downloadedCommunities];
                     _tasks = _downloadedTasks;
                     
                     _downloadedTasks = nil;
@@ -385,21 +457,32 @@ static NSString* const LocalTasksParameterName = @"postLocation";
         }
         
         if (![_downloadedCommunities count]) {
-            _communities = _downloadedCommunities;
+            [self setCommunities:_downloadedCommunities];
             _tasks = _downloadedTasks;
             [self reloadUI];
         }
     }];
 }
 
+- (BOOL)userHasChanged {
+    return ![[PFUser currentUser].username isEqualToString:_lastUsername];
+}
+
+- (void)clearUI {
+    _tasks = nil;
+    _communities = nil;
+    _selectedCommunity = 0;
+    
+    [_mapView removeAnnotations:_mapView.annotations];
+    
+    self.navigationItem.title = @"Loading...";
+    
+    [self reloadUI];
+}
+
 - (void)refresh {
-    if (![[PFUser currentUser].username isEqualToString:_lastUsername]) {
-        _tasks = nil;
-        _communities = nil;
-        
-        self.navigationItem.title = @"Loading...";
-        
-        [self reloadUI];
+    if ([self userHasChanged]) {
+        [self clearUI];
     }
     
     if (!_communities) {

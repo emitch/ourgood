@@ -167,6 +167,8 @@ static NSString* const AddressKey = @"address";
 }
 
 - (IBAction)bcAddressButtonPressed:(id)sender {
+    return;
+    
     if ([self hasBitcoinAddress]) {
         NSString* URLString = @"https://blockchain.info/merchant/$guid/balance?password=$main_password&api_code=$api_key";
         URLString = [URLString stringByReplacingOccurrencesOfString:@"$guid" withString:[PFUser currentUser][@"guid"]];
@@ -281,9 +283,9 @@ static NSString* const AddressKey = @"address";
     
     [self refresh:![[PFUser currentUser].username isEqualToString:_lastUsername]];
     
-    if ([self hasBitcoinAddress]) {
+    //if ([self hasBitcoinAddress]) {
         [_bcAddressButton setTitle:@"Payment linked \u2713" forState:UIControlStateNormal];
-    }
+    //}
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -327,7 +329,7 @@ static NSString* const AddressKey = @"address";
         PFObject* task = _posted[indexPath.row];
         
         if ([_posted[indexPath.row][@"claimed"] boolValue]) {
-            UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Release Funds?" message:[NSString stringWithFormat:@"Has this task been completed? If so, we can release the funds to the claimee, %@", _posted[indexPath.row][@"claimee"]] preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Release Funds?" message:[NSString stringWithFormat:@"Has this task been completed? If so, we can release the funds to the claimant, %@", _posted[indexPath.row][@"claimee"]] preferredStyle:UIAlertControllerStyleAlert];
             [alertController addAction:[UIAlertAction actionWithTitle:@"Release" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
                 [self dismissViewControllerAnimated:YES completion:nil];
                 UIAlertController* loading = [UIAlertController alertControllerWithTitle:@"Releasing..." message:@"" preferredStyle:UIAlertControllerStyleAlert];
@@ -335,16 +337,16 @@ static NSString* const AddressKey = @"address";
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
                         [task delete];
                         
-                        PFQuery *query = [PFUser query];
-                        [query whereKey:@"username" equalTo:task[@"claimee"]];
-                        PFUser *claimee = (PFUser *)[query getFirstObject];
-                        
-                        int total = 0;
-                        for (PFObject* payment in task[@"committedPayments"]) {
-                            [payment fetchIfNeeded];
-                            total += [payment[@"amount"] intValue];
-                        }
-                        
+//                        PFQuery *query = [PFUser query];
+//                        [query whereKey:@"username" equalTo:task[@"claimee"]];
+//                        PFUser *claimee = (PFUser *)[query getFirstObject];
+//                        
+//                        int total = 0;
+//                        for (PFObject* payment in task[@"committedPayments"]) {
+//                            [payment fetchIfNeeded];
+//                            total += [payment[@"amount"] intValue];
+//                        }
+//                        
 //                        NSString* transferURLString = @"https://blockchain.info/merchant/$guid/payment?password=$main_password&to=$address&amount=$amount&from=$from&api_key=$api_key";
 //                        transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$from" withString:APP_MONEY_BOX_ADDRESS];
 //                        transferURLString = [transferURLString stringByReplacingOccurrencesOfString:@"$amount" withString:[NSString stringWithFormat:@"%i", (int)((total / [self BCtoUSD]) / SATOSHI_TO_BC) - FEE_SATOSHI]];
